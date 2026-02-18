@@ -56,18 +56,19 @@
         </table>
     </div>
 
-    <div class="modal-overlay" id="overlay"></div>
+    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="modal">
         <button class="modal-close-btn" onclick="closeModal()">×</button>
         <h2 id="zoneText"></h2>
         <span class="modal-label">Fecha</span>
         <input type="date" id="inputDate">
         <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1">
+        <input type="number" id="inputTotal" min="1" placeholder="Ej: 10">
         <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0">
+        <input type="number" id="inputMade" min="0" placeholder="Ej: 7">
         <span class="modal-label">Nota (Opcional)</span>
-        <textarea id="inputNote" maxlength="50"></textarea>
+        <textarea id="inputNote" maxlength="50" placeholder="Sensaciones..."></textarea>
+        <p id="errorMsg" class="error-text">⚠️ Verifica los datos (encestados ≤ total)</p>
         <button id="saveBtn" class="btn-save">Confirmar Sesión ✓</button>
     </div>
 
