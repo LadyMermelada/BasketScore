@@ -2,100 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basket Score - Pro Log v1.13</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Basket Score Pro</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary: #ff8800; --bg: #0a0a0a; --card: #161616;
-            --text: #ffffff; --danger: #f44336;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
-        }
-
-        .header-tools {
-            width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 15px; padding: 0 10px; box-sizing: border-box;
-        }
-
-        .btn-tool { 
-            background: #222; color: #888; border: 1px solid #333; padding: 8px 12px; 
-            border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold;
-        }
-
-        .main-layout {
-            display: grid; grid-template-columns: 1fr 350px; gap: 20px;
-            width: 100%; max-width: 1200px;
-        }
-
-        .court-wrapper { 
-            position: relative; width: 100%; aspect-ratio: 150 / 140; 
-            background: #111; border-radius: 12px; border: 1px solid #333; overflow: hidden;
-        }
-
-        .court-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; stroke: rgba(255,255,255,0.15); fill: none; stroke-width: 1.5; }
-        
-        .grid-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(10, 1fr);
-        }
-
-        .grid-cell { border: 1px solid rgba(255,255,255,0.01); cursor: pointer; position: relative; }
-        .grid-cell:hover { z-index: 10; outline: 2px solid var(--primary); background: rgba(255,136,0,0.1) !important; }
-        
-        .cell-label { 
-            position: absolute; width: 100%; text-align: center; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); font-size: clamp(0.5rem, 1.5vw, 0.7rem); 
-            font-weight: 900; pointer-events: none; color: white; text-shadow: 0px 0px 4px black;
-        }
-
-        .sidebar { display: flex; flex-direction: column; gap: 15px; }
-        @media (max-width: 900px) {
-            .main-layout { grid-template-columns: 1fr; }
-            .sidebar { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-        }
-
-        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); }
-        .stat-header { display: flex; justify-content: space-between; align-items: center; }
-        .stat-header h4 { margin: 0; font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 1.6rem; font-weight: 900; color: var(--primary); }
-        .chart-container { height: 80px; width: 100%; margin-top: 5px; }
-
-        /* TABLA CON SCROLL */
-        .table-container { 
-            width: 100%; max-width: 1200px; margin-top: 30px; 
-            background: var(--card); border-radius: 12px; padding: 10px; 
-            box-sizing: border-box; 
-            max-height: 500px; /* Limita la altura */
-            overflow-y: auto; /* Agrega scroll vertical */
-        }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
-        thead { position: sticky; top: 0; background: var(--card); z-index: 5; }
-        th { color: #444; font-size: 0.6rem; text-transform: uppercase; padding: 15px 10px; border-bottom: 2px solid #222; text-align: left; }
-        td { padding: 12px 10px; border-bottom: 1px solid #222; font-size: 0.8rem; color: #ccc; }
-
-        /* MODAL */
-        #modal, .modal-overlay { display: none; position: fixed; z-index: 1000; }
-        .modal-overlay { top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
-        #modal { 
-            top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: #1a1a1a; padding: 30px; border-radius: 20px; 
-            width: min(95%, 360px); border: 1px solid #333;
-        }
-        .modal-close-btn { position: absolute; top: 15px; right: 20px; color: #555; font-size: 1.5rem; cursor: pointer; border: none; background: none; }
-        .modal-label { font-size: 0.7rem; color: #666; font-weight: bold; margin-bottom: 5px; display: block; text-transform: uppercase; }
-        input, textarea { width: 100%; background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; font-family: inherit; }
-        textarea { resize: none; height: 60px; }
-    </style>
 </head>
 <body>
 
     <div class="header-tools">
-        <h1 style="letter-spacing: 3px; font-weight: 900; margin: 0; font-size: 1.5rem;">BASKET<span style="color:var(--primary)">SCORE</span></h1>
+        <h1>BASKET<span style="color:var(--primary)">SCORE</span></h1>
         <div class="backup-btns">
             <button class="btn-tool" onclick="exportData()">EXPORTAR</button>
             <button class="btn-tool" onclick="document.getElementById('importFile').click()">IMPORTAR</button>
@@ -105,11 +20,11 @@
 
     <div class="main-layout">
         <div class="court-wrapper">
-            <svg class="court-svg" viewBox="0 0 150 140">
-                <rect x="50" y="0" width="50" height="58" /> 
-                <line x1="60" y1="10" x2="90" y2="10" /> 
-                <circle cx="75" cy="15" r="3" /> 
-                <path d="M 50 58 A 25 25 0 1 0 100 58" /> 
+            <svg class="court-svg" viewBox="0 0 150 140" preserveAspectRatio="xMidYMid meet">
+                <rect x="50" y="0" width="50" height="58" />
+                <line x1="60" y1="10" x2="90" y2="10" />
+                <circle cx="75" cy="15" r="3" />
+                <path d="M 50 58 A 25 25 0 1 0 100 58" />
                 <path d="M 15 0 L 15 35 Q 15 100 75 100 Q 135 100 135 35 L 135 0" />
             </svg>
             <div class="grid-overlay" id="gridOverlay"></div>
@@ -118,17 +33,17 @@
         <div class="sidebar">
             <div class="stat-card" onmouseleave="resetStats('tl')">
                 <div class="stat-header"><h4>Tiros Libres (30d)</h4><div class="stat-value" id="val-tl">--</div></div>
-                <div class="stat-date" id="date-tl" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                <div class="stat-date" id="date-tl"></div>
                 <div class="chart-container"><canvas id="chart-tl"></canvas></div>
             </div>
             <div class="stat-card" onmouseleave="resetStats('2p')">
                 <div class="stat-header"><h4>2 Puntos (30d)</h4><div class="stat-value" id="val-2p">--</div></div>
-                <div class="stat-date" id="date-2p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                <div class="stat-date" id="date-2p"></div>
                 <div class="chart-container"><canvas id="chart-2p"></canvas></div>
             </div>
             <div class="stat-card" onmouseleave="resetStats('3p')">
                 <div class="stat-header"><h4>3 Puntos (30d)</h4><div class="stat-value" id="val-3p">--</div></div>
-                <div class="stat-date" id="date-3p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                <div class="stat-date" id="date-3p"></div>
                 <div class="chart-container"><canvas id="chart-3p"></canvas></div>
             </div>
         </div>
@@ -144,173 +59,18 @@
     <div class="modal-overlay" id="overlay"></div>
     <div id="modal">
         <button class="modal-close-btn" onclick="closeModal()">×</button>
-        <h2 id="zoneText" style="color:var(--primary); text-align:center; margin-top:0"></h2>
+        <h2 id="zoneText"></h2>
         <span class="modal-label">Fecha</span>
         <input type="date" id="inputDate">
         <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1" placeholder="Ej: 10">
+        <input type="number" id="inputTotal" min="1">
         <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0" placeholder="Ej: 7">
+        <input type="number" id="inputMade" min="0">
         <span class="modal-label">Nota (Opcional)</span>
-        <textarea id="inputNote" maxlength="50" placeholder="Sensaciones del tiro..."></textarea>
-        <button id="saveBtn" class="btn-tool" style="width:100%; background:var(--primary); color:black; font-weight:900; padding:15px; font-size:0.9rem">CONFIRMAR SESIÓN ✓</button>
+        <textarea id="inputNote" maxlength="50"></textarea>
+        <button id="saveBtn" class="btn-save">Confirmar Sesión ✓</button>
     </div>
 
-    <script>
-        let sessions = JSON.parse(localStorage.getItem('basketV13')) || [];
-        let editingId = null, selectedCell = null, charts = {}, currentAverages = {};
-
-        function init() {
-            const grid = document.getElementById('gridOverlay');
-            grid.innerHTML = '';
-            for (let i = 0; i < 110; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'grid-cell';
-                cell.onclick = () => openModal(i);
-                grid.appendChild(cell);
-            }
-            window.addEventListener('keydown', (e) => {
-                if (document.getElementById('modal').style.display === 'block') {
-                    if (e.key === 'Escape') closeModal();
-                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') document.getElementById('saveBtn').click();
-                }
-            });
-            updateAll();
-        }
-
-        function detectRadialZone(cellId) {
-            const col = cellId % 11, row = Math.floor(cellId / 11);
-            const cellX = (col / 10) * 100, cellY = (row / 9) * 100;
-            const hoopX = 50, hoopY = 10;
-
-            let angleRad = Math.atan2(cellY - hoopY, cellX - hoopX);
-            let angleDeg = Math.round(Math.abs(angleRad * (180 / Math.PI) - 90) / 5) * 5;
-
-            const isTriple = (row >= 7 || col === 0 || col === 10 || ((col === 1 || col === 9) && row >= 5) || ((col === 2 || col === 8) && row >= 6));
-            let parent = isTriple ? "3 Puntos" : "2 Puntos";
-            let side = col < 5 ? "Izq." : (col > 5 ? "Der." : "");
-            let zoneName = "";
-
-            // REGLAS ESPECÍFICAS SOLICITADAS
-            if (isTriple) {
-                if ((col === 0 || col === 10) && row <= 2) zoneName = "Triple Lateral " + side;
-                else if ((col >= 5 && col <= 6) && row >= 7) zoneName = "Triple Frontal";
-                else zoneName = `Triple ${angleDeg}º ${side}`;
-            } else if (col >= 4 && col <= 6 && row >= 3 && row <= 5) {
-                parent = "Tiro Libre"; zoneName = "Tiro Libre"; side = "";
-            } else {
-                zoneName = `2 Puntos ${angleDeg === 0 ? 'Frontal' : angleDeg + 'º'} ${side}`;
-            }
-
-            return { parent, specific: zoneName.trim() };
-        }
-
-        function openModal(cellId, sid = null) {
-            selectedCell = cellId; editingId = sid;
-            const s = sessions.find(x => x.id === sid);
-            const info = detectRadialZone(cellId);
-            document.getElementById('zoneText').innerText = info.specific.toUpperCase();
-            document.getElementById('inputDate').value = s ? s.date : new Date().toISOString().split('T')[0];
-            document.getElementById('inputTotal').value = s ? s.total : "";
-            document.getElementById('inputMade').value = s ? s.made : "";
-            document.getElementById('inputNote').value = s ? s.note || "" : "";
-            document.getElementById('modal').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-            setTimeout(() => document.getElementById('inputTotal').focus(), 100);
-        }
-
-        document.getElementById('saveBtn').onclick = () => {
-            const total = parseInt(document.getElementById('inputTotal').value);
-            const made = parseInt(document.getElementById('inputMade').value);
-            if (isNaN(total) || made > total || made < 0 || total <= 0) return;
-            const info = detectRadialZone(selectedCell);
-            const data = { 
-                id: editingId || Date.now(), cellId: selectedCell, date: document.getElementById('inputDate').value, 
-                total, made, zone: info.parent, spec: info.specific, note: document.getElementById('inputNote').value 
-            };
-            if (editingId) sessions = sessions.map(s => s.id === editingId ? data : s);
-            else sessions.push(data);
-            localStorage.setItem('basketV13', JSON.stringify(sessions));
-            closeModal(); updateAll();
-        };
-
-        function updateAll() { updateTable(); updateHeatmap(); updateCharts(); }
-
-        function updateTable() {
-            const body = document.getElementById('logBody'); body.innerHTML = '';
-            // ORDEN INVERSO: Slice para no mutar el original y reverse
-            [...sessions].sort((a,b) => b.id - a.id).forEach(s => {
-                const p = Math.round((s.made/s.total)*100);
-                let color = p >= 70 ? '#4caf50' : (p >= 50 ? '#ffeb3b' : '#f44336');
-                body.innerHTML += `<tr>
-                    <td>${s.date}</td>
-                    <td style="color:var(--primary); font-weight:bold">${s.spec}</td>
-                    <td>${s.zone}</td>
-                    <td>${s.made}/${s.total}</td>
-                    <td style="color:${color}; font-weight:bold">${p}%</td>
-                    <td style="font-style:italic; font-size:0.75rem; color:#888">${s.note || '-'}</td>
-                    <td>
-                        <button style="background:none; border:none; cursor:pointer;" onclick="openModal(${s.cellId}, ${s.id})">⚙️</button>
-                        <button style="background:none; border:none; cursor:pointer;" onclick="deleteSession(${s.id})">🗑️</button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        function updateHeatmap() {
-            const cells = document.querySelectorAll('.grid-cell');
-            cells.forEach(c => { c.style.background = ''; c.innerHTML = ''; });
-            const realData = {};
-            sessions.forEach(s => realData[s.cellId] = Math.round((s.made/s.total)*100));
-            cells.forEach((cell, idx) => {
-                const cellX = idx % 11, cellY = Math.floor(idx / 11);
-                if (realData[idx] !== undefined) {
-                    let p = realData[idx];
-                    let r = p < 50 ? 255 : Math.round(510 - 5.1 * p);
-                    let g = p < 50 ? Math.round(5.1 * p) : 255;
-                    cell.style.backgroundColor = `rgba(${r}, ${g}, 0, 0.7)`;
-                    cell.innerHTML = `<span class="cell-label">${p}%</span>`;
-                }
-            });
-        }
-
-        function updateCharts() {
-            const zones = { "Tiro Libre": "tl", "2 Puntos": "2p", "3 Puntos": "3p" };
-            const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            Object.entries(zones).forEach(([name, id]) => {
-                const zH = sessions.filter(s => s.zone === name).sort((a,b) => new Date(a.date) - new Date(b.date));
-                const z30 = zH.filter(s => new Date(s.date) >= thirtyDaysAgo);
-                const tM = z30.reduce((a, b) => a + b.made, 0), tS = z30.reduce((a, b) => a + b.total, 0);
-                const avg30 = tS > 0 ? Math.round((tM / tS) * 100) : 0;
-                currentAverages[id] = avg30;
-                const vals = zH.slice(-15).map(d => Math.round((d.made/d.total)*100));
-                document.getElementById(`val-${id}`).innerText = avg30 + "%";
-                if (charts[id]) charts[id].destroy();
-                charts[id] = new Chart(document.getElementById(`chart-${id}`).getContext('2d'), {
-                    type: 'line',
-                    data: { labels: zH.slice(-15).map(d => d.date), datasets: [{ data: vals, borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }] },
-                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, 
-                    onHover: (event, el) => {
-                        const vEl = document.getElementById(`val-${id}`);
-                        if (el.length > 0) { vEl.innerText = vals[el[0].index] + "%"; vEl.style.color = "#fff"; }
-                    },
-                    plugins: { legend: {display: false}, tooltip: {enabled: false} },
-                    scales: { x: {display: false}, y: {display: false, min: 0, max: 105} } }
-                });
-            });
-        }
-
-        function resetStats(id) {
-            document.getElementById(`val-${id}`).innerText = currentAverages[id] + "%";
-            document.getElementById(`val-${id}`).style.color = "var(--primary)";
-        }
-
-        function exportData() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(sessions)], {type: 'application/json'})); a.download = 'basket_log_v13.json'; a.click(); }
-        function importData(e) { const r = new FileReader(); r.onload = (ev) => { sessions = JSON.parse(ev.target.result); localStorage.setItem('basketV13', JSON.stringify(sessions)); updateAll(); }; r.readAsText(e.target.files[0]); }
-        function deleteSession(id) { if(confirm('¿BORRAR?')) { sessions = sessions.filter(s => s.id !== id); localStorage.setItem('basketV13', JSON.stringify(sessions)); updateAll(); } }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
-        document.getElementById('overlay').onclick = closeModal;
-        init();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
