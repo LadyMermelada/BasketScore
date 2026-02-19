@@ -1,20 +1,19 @@
 let sessions = JSON.parse(localStorage.getItem('basketV_Final')) || [];
 let editingId = null, selectedCell = null, charts = {}, currentAverages = {};
 
-// --- NAVEGACIÓN DE TABS ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
     document.getElementById(`tab-${tabId}`).classList.add('active');
 
-    const navItems = document.querySelectorAll('.nav-item');
-    if(tabId === 'cancha') navItems[0].classList.add('active');
-    if(tabId === 'club') navItems[1].classList.add('active');
-    if(tabId === 'perfil') navItems[2].classList.add('active');
+    // Activar icono nav
+    const items = document.querySelectorAll('.nav-item');
+    if(tabId === 'cancha') items[0].classList.add('active');
+    if(tabId === 'club') items[1].classList.add('active');
+    if(tabId === 'perfil') items[2].classList.add('active');
 
     if(tabId === 'cancha') {
-        // Pequeño delay para que Chart.js encuentre los canvas visibles
         setTimeout(updateAll, 50);
     }
 }
@@ -94,7 +93,6 @@ document.getElementById('saveBtn').onclick = () => {
     const total = parseInt(document.getElementById('inputTotal').value);
     const made = parseInt(document.getElementById('inputMade').value);
 
-    // REESTABLECIDO: Validación de errores
     if (isNaN(total) || made > total || made < 0 || total <= 0) {
         document.getElementById('errorMsg').style.display = 'block';
         return;
@@ -127,6 +125,7 @@ function updateAll() {
 
 function updateTable() {
     const body = document.getElementById('logBody');
+    if (!body) return;
     body.innerHTML = '';
     [...sessions].sort((a,b) => b.id - a.id).forEach(s => {
         const p = Math.round((s.made / s.total) * 100);
@@ -147,6 +146,7 @@ function updateTable() {
 
 function updateHeatmap() {
     const cells = document.querySelectorAll('.grid-cell');
+    if (cells.length === 0) return;
     cells.forEach(c => { c.style.background = ''; c.innerHTML = ''; });
 
     const realData = {};
@@ -159,7 +159,6 @@ function updateHeatmap() {
             cell.style.backgroundColor = `rgba(${r}, ${g}, 0, 0.7)`;
             cell.innerHTML = `<span class="cell-label">${p}%</span>`;
         } else {
-            // REESTABLECIDO: Heatmap Predictivo
             let num = 0, den = 0;
             Object.keys(realData).forEach(rIdx => {
                 const dist = Math.sqrt(Math.pow(cellX - (rIdx%11), 2) + Math.pow(cellY - Math.floor(rIdx/11), 2));
@@ -189,36 +188,27 @@ function updateCharts() {
         const last15 = zH.slice(-15);
         const vals = last15.map(d => Math.round((d.made / d.total) * 100));
 
-        document.getElementById(`val-${id}`).innerText = avg30d + "%";
+        const valEl = document.getElementById(`val-${id}`);
+        if (valEl) valEl.innerText = avg30d + "%";
 
         const canvas = document.getElementById(`chart-${id}`);
-        if (!canvas) return;
+        if (!canvas || canvas.offsetParent === null) return; // Si no es visible, no dibujes
 
         if (charts[id]) charts[id].destroy();
         charts[id] = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
                 labels: last15.map(d => d.date),
-                datasets: [{
-                    data: vals,
-                    borderColor: '#ff8800',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    pointRadius: 2,
-                    fill: true,
-                    backgroundColor: 'rgba(255, 136, 0, 0.05)'
-                }]
+                datasets: [{ data: vals, borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                 onHover: (event, el) => {
                     const vEl = document.getElementById(`val-${id}`);
                     const dEl = document.getElementById(`date-${id}`);
                     if (el.length > 0) {
                         vEl.innerText = vals[el[0].index] + "%";
-                        dEl.innerText = last15[el[0].index].date;
+                        if (dEl) dEl.innerText = last15[el[0].index].date;
                         vEl.style.color = "#fff";
                     }
                 },
@@ -230,13 +220,37 @@ function updateCharts() {
 }
 
 function resetStats(id) {
-    document.getElementById(`val-${id}`).innerText = currentAverages[id] + "%";
-    document.getElementById(`val-${id}`).style.color = "var(--primary)";
-    document.getElementById(`date-${id}`).innerText = "";
+    const vEl = document.getElementById(`val-${id}`);
+    const dEl = document.getElementById(`date-${id}`);
+    if (vEl) {
+        vEl.innerText = (currentAverages[id] || 0) + "%";
+        vEl.style.color = "var(--primary)";
+    }
+    if (dEl) dEl.innerText = "";
 }
 
-function exportData() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(sessions)], {type: 'application/json'})); a.download = 'backup.json'; a.click(); }
-function importData(e) { const r = new FileReader(); r.onload = (ev) => { sessions = JSON.parse(ev.target.result); localStorage.setItem('basketV_Final', JSON.stringify(sessions)); updateAll(); }; r.readAsText(e.target.files[0]); }
-function deleteSession(id) { if(confirm('¿Borrar?')) { sessions = sessions.filter(s => s.id !== id); localStorage.setItem('basketV_Final', JSON.stringify(sessions)); updateAll(); } }
+function exportData() {
+    const blob = new Blob([JSON.stringify(sessions)], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click();
+}
 
-init();
+function importData(e) {
+    const r = new FileReader();
+    r.onload = (ev) => {
+        sessions = JSON.parse(ev.target.result);
+        localStorage.setItem('basketV_Final', JSON.stringify(sessions));
+        updateAll();
+    };
+    r.readAsText(e.target.files[0]);
+}
+
+function deleteSession(id) {
+    if(confirm('¿Borrar?')) {
+        sessions = sessions.filter(s => s.id !== id);
+        localStorage.setItem('basketV_Final', JSON.stringify(sessions));
+        updateAll();
+    }
+}
+
+// Arrancar
+window.onload = init;

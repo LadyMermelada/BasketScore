@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Score App</title>
+    <title>Basket Score Pro v1.15.1</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -80,15 +80,15 @@
     </section>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('cancha')">
+        <div class="nav-item active" onclick="switchTab('cancha')">
             <span class="nav-icon">🏀</span><span class="nav-text">Cancha</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('club')">
+        </div>
+        <div class="nav-item" onclick="switchTab('club')">
             <span class="nav-icon">🏆</span><span class="nav-text">Club</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('perfil')">
+        </div>
+        <div class="nav-item" onclick="switchTab('perfil')">
             <span class="nav-icon">👤</span><span class="nav-text">Perfil</span>
-        </button>
+        </div>
     </nav>
 
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
@@ -98,13 +98,13 @@
         <span class="modal-label">Fecha</span>
         <input type="date" id="inputDate">
         <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1" placeholder="Ej: 10">
+        <input type="number" id="inputTotal" min="1">
         <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0" placeholder="Ej: 7">
+        <input type="number" id="inputMade" min="0">
         <span class="modal-label">Nota</span>
-        <textarea id="inputNote" maxlength="50" placeholder="Sensaciones..."></textarea>
-        <p id="errorMsg" class="error-text" style="color:var(--danger); font-size:0.65rem; display:none; text-align:center; font-weight:bold; margin-bottom:10px;">⚠️ Verifica los datos (encestados ≤ total)</p>
-        <button id="saveBtn" class="btn-save">Confirmar Sesión ✓</button>
+        <textarea id="inputNote" maxlength="50"></textarea>
+        <p id="errorMsg">⚠️ Los encestados no pueden superar el total</p>
+        <button id="saveBtn" class="btn-save">Confirmar ✓</button>
     </div>
 
     <script src="script.js"></script>
