@@ -3,58 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Score Pro</title>
+    <title>Basket Score App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div class="header-tools">
-        <h1>BASKET<span style="color:var(--primary)">SCORE</span></h1>
-        <div class="backup-btns">
-            <button class="btn-tool" onclick="exportData()">EXPORTAR</button>
-            <button class="btn-tool" onclick="document.getElementById('importFile').click()">IMPORTAR</button>
-            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-        </div>
-    </div>
-
-    <div class="main-layout">
-        <div class="court-wrapper">
-            <svg class="court-svg" viewBox="0 0 150 140" preserveAspectRatio="xMidYMid meet">
-                <rect x="50" y="0" width="50" height="58" />
-                <line x1="60" y1="10" x2="90" y2="10" />
-                <circle cx="75" cy="15" r="3" />
-                <path d="M 50 58 A 25 25 0 1 0 100 58" />
-                <path d="M 15 0 L 15 35 Q 15 100 75 100 Q 135 100 135 35 L 135 0" />
-            </svg>
-            <div class="grid-overlay" id="gridOverlay"></div>
-        </div>
-
-        <div class="sidebar">
-            <div class="stat-card" onmouseleave="resetStats('tl')">
-                <div class="stat-header"><h4>Tiros Libres (30d)</h4><div class="stat-value" id="val-tl">--</div></div>
-                <div class="stat-date" id="date-tl"></div>
-                <div class="chart-container"><canvas id="chart-tl"></canvas></div>
-            </div>
-            <div class="stat-card" onmouseleave="resetStats('2p')">
-                <div class="stat-header"><h4>2 Puntos (30d)</h4><div class="stat-value" id="val-2p">--</div></div>
-                <div class="stat-date" id="date-2p"></div>
-                <div class="chart-container"><canvas id="chart-2p"></canvas></div>
-            </div>
-            <div class="stat-card" onmouseleave="resetStats('3p')">
-                <div class="stat-header"><h4>3 Puntos (30d)</h4><div class="stat-value" id="val-3p">--</div></div>
-                <div class="stat-date" id="date-3p"></div>
-                <div class="chart-container"><canvas id="chart-3p"></canvas></div>
+    <section id="tab-cancha" class="tab-content active">
+        <div class="header-tools">
+            <h1>BASKET<span style="color:var(--primary)">SCORE</span></h1>
+            <div class="backup-btns">
+                <button class="btn-tool" onclick="exportData()">EXP</button>
+                <button class="btn-tool" onclick="document.getElementById('importFile').click()">IMP</button>
+                <input type="file" id="importFile" style="display:none" onchange="importData(event)">
             </div>
         </div>
-    </div>
 
-    <div class="table-container">
-        <table>
-            <thead><tr><th>FECHA</th><th>ZONA</th><th>CAT.</th><th>RATIO</th><th>%</th><th>NOTA</th><th>ACCIONES</th></tr></thead>
-            <tbody id="logBody"></tbody>
-        </table>
-    </div>
+        <div class="main-layout">
+            <div class="court-wrapper">
+                <svg class="court-svg" viewBox="0 0 150 140" preserveAspectRatio="xMidYMid meet">
+                    <rect x="50" y="0" width="50" height="58" />
+                    <line x1="60" y1="10" x2="90" y2="10" />
+                    <circle cx="75" cy="15" r="3" />
+                    <path d="M 50 58 A 25 25 0 1 0 100 58" />
+                    <path d="M 15 0 L 15 35 Q 15 100 75 100 Q 135 100 135 35 L 135 0" />
+                </svg>
+                <div class="grid-overlay" id="gridOverlay"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="stat-card" onmouseleave="resetStats('tl')">
+                    <div class="stat-header"><h4>Tiros Libres</h4><div class="stat-value" id="val-tl">--</div></div>
+                    <div class="chart-container"><canvas id="chart-tl"></canvas></div>
+                </div>
+                <div class="stat-card" onmouseleave="resetStats('2p')">
+                    <div class="stat-header"><h4>2 Puntos</h4><div class="stat-value" id="val-2p">--</div></div>
+                    <div class="chart-container"><canvas id="chart-2p"></canvas></div>
+                </div>
+                <div class="stat-card" onmouseleave="resetStats('3p')">
+                    <div class="stat-header"><h4>3 Puntos</h4><div class="stat-value" id="val-3p">--</div></div>
+                    <div class="chart-container"><canvas id="chart-3p"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-club" class="tab-content">
+        <div class="header-simple">
+            <h2>🏆 Leaderboard <span class="subtitle">30 Días</span></h2>
+        </div>
+        <div class="leaderboard-container">
+            <table class="leader-table">
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Jugador</th>
+                        <th>3P %</th>
+                        <th>2P %</th>
+                        <th>TL %</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr><td>1</td><td>Goga Admin</td><td>45%</td><td>60%</td><td>85%</td></tr>
+                    <tr><td>2</td><td>Jugador 2</td><td>38%</td><td>55%</td><td>78%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="tab-perfil" class="tab-content">
+        <div class="header-simple">
+            <h2>👤 Mi Perfil</h2>
+        </div>
+        <div class="table-container">
+            <table class="log-table">
+                <thead><tr><th>FECHA</th><th>ZONA</th><th>RATIO</th><th>%</th><th>NOTA</th><th>ACCIONES</th></tr></thead>
+                <tbody id="logBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('cancha')">
+            <span class="nav-icon">🏀</span>
+            <span class="nav-text">Cancha</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('club')">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-text">Club</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('perfil')">
+            <span class="nav-icon">👤</span>
+            <span class="nav-text">Perfil</span>
+        </button>
+    </nav>
 
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="modal">
@@ -63,12 +105,11 @@
         <span class="modal-label">Fecha</span>
         <input type="date" id="inputDate">
         <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1" placeholder="Ej: 10">
+        <input type="number" id="inputTotal" min="1">
         <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0" placeholder="Ej: 7">
-        <span class="modal-label">Nota (Opcional)</span>
-        <textarea id="inputNote" maxlength="50" placeholder="Sensaciones..."></textarea>
-        <p id="errorMsg" class="error-text">⚠️ Verifica los datos (encestados ≤ total)</p>
+        <input type="number" id="inputMade" min="0">
+        <span class="modal-label">Nota</span>
+        <textarea id="inputNote" maxlength="50"></textarea>
         <button id="saveBtn" class="btn-save">Confirmar Sesión ✓</button>
     </div>
 
