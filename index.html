@@ -34,14 +34,17 @@
             <div class="sidebar">
                 <div class="stat-card" onmouseleave="resetStats('tl')">
                     <div class="stat-header"><h4>Tiros Libres</h4><div class="stat-value" id="val-tl">--</div></div>
+                    <div class="stat-date" id="date-tl" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
                     <div class="chart-container"><canvas id="chart-tl"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('2p')">
                     <div class="stat-header"><h4>2 Puntos</h4><div class="stat-value" id="val-2p">--</div></div>
+                    <div class="stat-date" id="date-2p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
                     <div class="chart-container"><canvas id="chart-2p"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('3p')">
                     <div class="stat-header"><h4>3 Puntos</h4><div class="stat-value" id="val-3p">--</div></div>
+                    <div class="stat-date" id="date-3p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
                     <div class="chart-container"><canvas id="chart-3p"></canvas></div>
                 </div>
             </div>
@@ -55,17 +58,10 @@
         <div class="leaderboard-container">
             <table class="leader-table">
                 <thead>
-                    <tr>
-                        <th>Pos</th>
-                        <th>Jugador</th>
-                        <th>3P %</th>
-                        <th>2P %</th>
-                        <th>TL %</th>
-                    </tr>
+                    <tr><th>Pos</th><th>Jugador</th><th>3P %</th><th>2P %</th><th>TL %</th></tr>
                 </thead>
                 <tbody id="leaderboardBody">
-                    <tr><td>1</td><td>Goga Admin</td><td>45%</td><td>60%</td><td>85%</td></tr>
-                    <tr><td>2</td><td>Jugador 2</td><td>38%</td><td>55%</td><td>78%</td></tr>
+                    <tr><td>1</td><td>Goga Admin</td><td>--</td><td>--</td><td>--</td></tr>
                 </tbody>
             </table>
         </div>
@@ -85,16 +81,13 @@
 
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('cancha')">
-            <span class="nav-icon">🏀</span>
-            <span class="nav-text">Cancha</span>
+            <span class="nav-icon">🏀</span><span class="nav-text">Cancha</span>
         </button>
         <button class="nav-item" onclick="switchTab('club')">
-            <span class="nav-icon">🏆</span>
-            <span class="nav-text">Club</span>
+            <span class="nav-icon">🏆</span><span class="nav-text">Club</span>
         </button>
         <button class="nav-item" onclick="switchTab('perfil')">
-            <span class="nav-icon">👤</span>
-            <span class="nav-text">Perfil</span>
+            <span class="nav-icon">👤</span><span class="nav-text">Perfil</span>
         </button>
     </nav>
 
@@ -105,11 +98,12 @@
         <span class="modal-label">Fecha</span>
         <input type="date" id="inputDate">
         <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1">
+        <input type="number" id="inputTotal" min="1" placeholder="Ej: 10">
         <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0">
+        <input type="number" id="inputMade" min="0" placeholder="Ej: 7">
         <span class="modal-label">Nota</span>
-        <textarea id="inputNote" maxlength="50"></textarea>
+        <textarea id="inputNote" maxlength="50" placeholder="Sensaciones..."></textarea>
+        <p id="errorMsg" class="error-text" style="color:var(--danger); font-size:0.65rem; display:none; text-align:center; font-weight:bold; margin-bottom:10px;">⚠️ Verifica los datos (encestados ≤ total)</p>
         <button id="saveBtn" class="btn-save">Confirmar Sesión ✓</button>
     </div>
 
