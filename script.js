@@ -1,34 +1,68 @@
 let sessions = JSON.parse(localStorage.getItem('basketV_Final')) || [];
 let editingId = null, selectedZone = null, charts = {}, currentAverages = {};
 
-// GEOMETRÍA CORREGIDA v1.16.3
-// - Pintura dividida en 2 (Alta/Baja)
-// - Tiro libre más chato y sin superposición con alas
-// - Alas medias ajustadas a los nuevos bordes
+// Tu diseño desde Illustrator mapeado a nuestra lógica
 const ZONAS_PRO = [
-    // --- ZONAS EXTERIORES (3 Puntos) ---
-    // Se dibujan primero para quedar al fondo
-    { id: '3p-l-corner', label: 'Triple Esq Izq', path: 'M 0 0 L 15 0 L 15 35 L 0 35 Z', cx: 7.5, cy: 17.5, type: '3p' },
-    { id: '3p-r-corner', label: 'Triple Esq Der', path: 'M 135 0 L 150 0 L 150 35 L 135 35 Z', cx: 142.5, cy: 17.5, type: '3p' },
-    { id: '3p-l-wing', label: 'Triple Ala Izq', path: 'M 0 35 L 15 35 Q 15 100 75 100 L 75 140 L 0 140 Z', cx: 25, cy: 100, type: '3p' },
-    { id: '3p-r-wing', label: 'Triple Ala Der', path: 'M 150 35 L 135 35 Q 135 100 75 100 L 75 140 L 150 140 Z', cx: 125, cy: 100, type: '3p' },
+    // TRIPLES
+    { id: 'Triple_x5F_Izq', label: 'Triple Izq', type: '3p' },
+    { id: 'Triple_x5F_Der', label: 'Triple Der', type: '3p' },
+    { id: 'Triple_x5F_Frontal', label: 'Triple Frontal', type: '3p' },
+    { id: 'Triple_x5F_Lateral_x5F_Izq', label: 'Triple Esquina Izq', type: '3p' },
+    { id: 'Triple_x5F_Lateral_x5F_Der', label: 'Triple Esquina Der', type: '3p' },
 
-    // --- ZONAS MEDIA DISTANCIA ---
-    { id: 'mid-l-corner', label: 'Media Esq Izq', path: 'M 15 0 L 50 0 L 50 35 L 15 35 Z', cx: 32.5, cy: 17.5, type: '2p' },
-    { id: 'mid-r-corner', label: 'Media Esq Der', path: 'M 100 0 L 135 0 L 135 35 L 100 35 Z', cx: 117.5, cy: 17.5, type: '2p' },
-    // Alas ajustadas para no invadir la pintura ni el tiro libre
-    { id: 'mid-l-wing', label: 'Media Ala Izq', path: 'M 15 35 L 50 35 L 50 88 Q 32 88 15 82 Z', cx: 35, cy: 60, type: '2p' },
-    { id: 'mid-r-wing', label: 'Media Ala Der', path: 'M 135 35 L 100 35 L 100 88 Q 118 88 135 82 Z', cx: 115, cy: 60, type: '2p' },
+    // DOBLES (2 PUNTOS)
+    { id: 'Doble_x5F_Lateral_x5F_Izq', label: 'Doble Lateral Izq', type: '2p' },
+    { id: 'Doble_x5F_Lateral_x5F_Der', label: 'Doble Lateral Der', type: '2p' },
+    { id: 'Doble_x5F_Ala_x5F_Izq', label: 'Doble Ala Izq', type: '2p' },
+    { id: 'Doble_x5F_Ala:_x5F_Der', label: 'Doble Ala Der', type: '2p' }, // Nota: Tu Illustrator puso ":" aquí
+    { id: 'Doble_x5F_Pintura_x5F_Bajo', label: 'Pintura Baja', type: '2p' },
+    { id: 'Doble_x5F_Pintura_x5F_Alto', label: 'Pintura Alta', type: '2p' },
 
-    // --- ZONAS INTERIORES (Pintura y TL) ---
-    // Pintura dividida horizontalmente
-    { id: 'paint-top', label: 'Pintura Alta', path: 'M 50 0 L 100 0 L 100 29 L 50 29 Z', cx: 75, cy: 22, type: '2p' },
-    { id: 'paint-bottom', label: 'Pintura Baja', path: 'M 50 29 L 100 29 L 100 58 L 50 58 Z', cx: 75, cy: 43.5, type: '2p' },
-    // Tiro libre más chato (Q 75 80 en vez de curvas más profundas)
-    { id: 'ft', label: 'Tiro Libre', path: 'M 50 58 Q 75 80 100 58 Z', cx: 75, cy: 67, type: 'tl' },
-    // Aro encima de todo
-    { id: 'rim', label: 'Bajo Aro', path: 'M 60 0 L 90 0 L 90 15 Q 75 25 60 15 Z', cx: 75, cy: 10, type: '2p' }
+    // TIROS LIBRES
+    { id: 'TiroLibre', label: 'Tiro Libre', type: 'tl' }
 ];
+
+// Tu código SVG limpio (sin el header XML que estorba en HTML)
+const TU_SVG = `
+<svg viewBox="0 0 500 350" style="width: 100%; height: 100%;">
+  <g id="Triple_x5F_Izq" class="zona-interactiva">
+    <path d="M183.25,275.82v74.18H0v-164.96h71.82c24.9,42.18,64.34,74.74,111.43,90.78Z"/>
+  </g>
+  <g id="Triple_x5F_Der" class="zona-interactiva">
+    <path d="M500,185.04v164.96h-183.25v-74.21c47.09-16.04,86.55-48.59,111.44-90.75h71.81Z"/>
+  </g>
+  <g id="Triple_x5F_Frontal" class="zona-interactiva">
+    <path d="M316.75,275.79v74.21h-133.5v-74.18c20.92,7.13,43.36,11,66.7,11s45.84-3.88,66.8-11.03Z"/>
+  </g>
+  <g id="Doble_x5F_Pintura_x5F_Bajo" class="zona-interactiva">
+    <rect x="183.25" width="133.5" height="110.04"/>
+  </g>
+  <g id="Doble_x5F_Pintura_x5F_Alto" class="zona-interactiva">
+    <rect x="183.25" y="110.04" width="133.5" height="110.04"/>
+  </g>
+  <g id="Triple_x5F_Lateral_x5F_Der" class="zona-interactiva">
+    <rect x="428.13" y="0" width="71.87" height="185.03"/>
+  </g>
+  <g id="Doble_x5F_Lateral_x5F_Der" class="zona-interactiva">
+    <rect x="316.75" y="0" width="111.44" height="110.04"/>
+  </g>
+  <g id="Doble_x5F_Ala:_x5F_Der" class="zona-interactiva">
+    <path d="M428.19,110.04v75c-35.94,60.87-102.25,101.72-178.06,101.78,36.8-.07,66.62-29.93,66.62-66.75v-110.03h111.44Z"/>
+  </g>
+  <g id="TiroLibre" class="zona-interactiva">
+    <path d="M316.75,220.07c0,36.86-29.89,66.75-66.75,66.75s-66.75-29.89-66.75-66.75h133.5Z"/>
+  </g>
+  <g id="Triple_x5F_Lateral_x5F_Izq" class="zona-interactiva">
+    <rect x="0" y="0" width="71.87" height="185.03"/>
+  </g>
+  <g id="Doble_x5F_Lateral_x5F_Izq" class="zona-interactiva">
+    <rect x="71.82" y="0" width="111.43" height="110.04"/>
+  </g>
+  <g id="Doble_x5F_Ala_x5F_Izq" class="zona-interactiva">
+    <path d="M249.95,286.82c-75.88,0-142.16-40.86-178.13-101.78v-75h111.43v110.03c0,36.84,29.85,66.72,66.7,66.75Z"/>
+  </g>
+</svg>
+`;
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -44,37 +78,54 @@ function switchTab(tabId) {
 
 function init() {
     const container = document.getElementById('courtContainer');
-    container.innerHTML = '';
+    // Inyectamos tu SVG
+    container.innerHTML = TU_SVG;
 
-    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 150 140");
-    svg.style.width = "100%";
-    svg.style.height = "100%";
+    // Obtenemos el elemento SVG real que acabamos de inyectar
+    const svgElement = container.querySelector('svg');
 
-    ZONAS_PRO.forEach(zona => {
-        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    // Aplicar estilos y eventos a cada grupo (g) de tu diseño
+    const grupos = svgElement.querySelectorAll('.zona-interactiva');
 
-        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", zona.path);
-        path.setAttribute("id", zona.id);
-        path.setAttribute("class", "zona-path");
-        path.style.fill = "rgba(255,255,255,0.02)";
-        path.onclick = () => openModal(zona.id);
+    grupos.forEach(grupo => {
+        const zoneId = grupo.getAttribute('id');
+        const zonaLogica = ZONAS_PRO.find(z => z.id === zoneId);
 
-        let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", zona.cx);
-        text.setAttribute("y", zona.cy);
-        text.setAttribute("class", "zona-label-text");
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("id", "label-" + zona.id);
-        text.textContent = "";
+        // Estilos base (heredando lo que teníamos en CSS)
+        grupo.classList.add('zona-path');
+        grupo.style.fill = "rgba(255,255,255,0.02)";
+        grupo.style.cursor = "pointer";
 
-        g.appendChild(path);
-        g.appendChild(text);
-        svg.appendChild(g);
+        // Evento de clic
+        grupo.onclick = () => openModal(zoneId);
+
+        // --- CÁLCULO DE CENTRO PARA EL TEXTO ---
+        // Esperamos un milisegundo a que el navegador dibuje el SVG para medirlo
+        setTimeout(() => {
+            const bbox = grupo.getBBox();
+            // Calculamos el centro exacto de la caja delimitadora de tu forma
+            const cx = bbox.x + bbox.width / 2;
+            const cy = bbox.y + bbox.height / 2;
+
+            let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", cx);
+            text.setAttribute("y", cy);
+            text.setAttribute("class", "zona-label-text");
+            // Ajustamos el tamaño del texto para este SVG que es de 500x350
+            text.style.fontSize = "16px";
+            text.style.fontWeight = "900";
+            text.style.fill = "white";
+            text.style.textShadow = "1px 1px 3px rgba(0,0,0,0.8)";
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle"); // Centra verticalmente
+            text.setAttribute("id", "label-" + zoneId);
+            text.style.pointerEvents = "none";
+            text.textContent = "";
+
+            grupo.appendChild(text);
+        }, 50);
     });
 
-    container.appendChild(svg);
     closeModal();
     updateAll();
 }
@@ -111,7 +162,7 @@ document.getElementById('saveBtn').onclick = () => {
     }
 
     const zonaInfo = ZONAS_PRO.find(z => z.id === selectedZone);
-    let parentZone = "2 Puntos";
+    let parentZone = "2 Puntos"; // Por defecto
     if (zonaInfo) {
         if (zonaInfo.type === '3p') parentZone = "3 Puntos";
         if (zonaInfo.type === 'tl') parentZone = "Tiro Libre";
@@ -171,10 +222,22 @@ function updateHeatmap() {
             let r = p < 50 ? 255 : Math.round(510 - 5.1 * p);
             let g = p < 50 ? Math.round(5.1 * p) : 255;
 
+            // Pintamos el relleno del grupo (g) o de sus hijos
             el.style.fill = `rgba(${r}, ${g}, 0, 0.6)`;
+            Array.from(el.children).forEach(child => {
+                if(child.tagName === 'path' || child.tagName === 'rect') {
+                     child.style.fill = `rgba(${r}, ${g}, 0, 0.6)`;
+                }
+            });
+
             if (label) label.textContent = p + "%";
         } else {
             el.style.fill = "rgba(255,255,255,0.02)";
+            Array.from(el.children).forEach(child => {
+                if(child.tagName === 'path' || child.tagName === 'rect') {
+                     child.style.fill = "rgba(255,255,255,0.02)";
+                }
+            });
             if (label) label.textContent = "";
         }
     });
