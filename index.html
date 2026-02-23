@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Score Pro v1.19.0</title>
+    <title>Basket Score Pro v1.20.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700;900&display=swap" rel="stylesheet">
@@ -31,21 +31,24 @@
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('tl')">
                     <div class="stat-header"><h4>Tiros Libres</h4><div class="stat-value" id="val-tl">--</div></div>
+                    <div class="stat-date" id="date-tl"></div>
                     <div class="chart-container"><canvas id="chart-tl"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('2p')">
                     <div class="stat-header"><h4>2 Puntos</h4><div class="stat-value" id="val-2p">--</div></div>
+                    <div class="stat-date" id="date-2p"></div>
                     <div class="chart-container"><canvas id="chart-2p"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('3p')">
                     <div class="stat-header"><h4>3 Puntos</h4><div class="stat-value" id="val-3p">--</div></div>
+                    <div class="stat-date" id="date-3p"></div>
                     <div class="chart-container"><canvas id="chart-3p"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div class="quick-log-container">
-            <h3 class="section-title">Últimas 10 Sesiones</h3>
+            <h3 class="section-title">Últimas 5 Sesiones</h3>
             <table>
                 <thead><tr><th>Fecha</th><th>Zona</th><th>Ratio</th><th>%</th><th>⚙️</th></tr></thead>
                 <tbody id="quickLogBody"></tbody>
@@ -65,18 +68,40 @@
             <button class="btn-switch-club">⇄</button>
         </div>
 
-        <div class="admin-panel">
-            <h3 class="section-title">Panel de Admin</h3>
-            <button class="btn-tool" style="width:100%; padding:10px; margin-bottom:10px;">🔗 Generar Link de Invitación</button>
-            <div class="member-list" id="mockMembersList"></div>
-        </div>
+        <details class="members-details">
+            <summary class="members-summary">
+                <span style="font-weight: bold; color: var(--primary);">👥 Gestión de Miembros</span>
+                <button class="btn-invite" onclick="event.preventDefault(); alert('Link de invitación copiado al portapapeles!');">🔗 Invitar</button>
+            </summary>
+            <div class="admin-panel">
+                <div class="member-list" id="mockMembersList"></div>
+            </div>
+        </details>
 
-        <div class="leaderboard-container" style="margin-top: 20px;">
+        <div style="margin-top: 20px;">
             <h3 class="section-title">🏆 Leaderboard (30 Días)</h3>
-            <table class="leader-table">
-                <thead><tr><th>Pos</th><th>Jugador</th><th>3P %</th><th>2P %</th><th>TL %</th></tr></thead>
-                <tbody id="leaderboardBody"></tbody>
-            </table>
+            <div class="leaderboard-grid">
+                <div class="lb-card">
+                    <h4>🎯 Especialista Libres</h4>
+                    <div class="lb-leader" id="leader-tl">--</div>
+                    <ul class="lb-top5" id="top5-tl"></ul>
+                </div>
+                <div class="lb-card">
+                    <h4>🔥 Middy (2 Pts)</h4>
+                    <div class="lb-leader" id="leader-2p">--</div>
+                    <ul class="lb-top5" id="top5-2p"></ul>
+                </div>
+                <div class="lb-card">
+                    <h4>💦 Triplista (3 Pts)</h4>
+                    <div class="lb-leader" id="leader-3p">--</div>
+                    <ul class="lb-top5" id="top5-3p"></ul>
+                </div>
+                <div class="lb-card">
+                    <h4>👑 Rey del Entreno</h4>
+                    <div class="lb-leader" id="leader-sessions">--</div>
+                    <ul class="lb-top5" id="top5-sessions"></ul>
+                </div>
+            </div>
         </div>
 
         <div class="feed-container" style="margin-top: 20px;">
@@ -86,22 +111,20 @@
     </section>
 
     <section id="tab-perfil" class="tab-content">
-        <div class="header-simple">
-            <h2>👤 Mi Perfil</h2>
-        </div>
+        <div class="header-simple"><h2>👤 Mi Perfil</h2></div>
 
         <div class="career-stats-container">
-            <div class="career-box">
-                <span class="career-label">Tiros Totales</span>
-                <span class="career-val" id="career-total">0</span>
-            </div>
-            <div class="career-box">
-                <span class="career-label">% Histórico</span>
-                <span class="career-val" id="career-pct">0%</span>
-            </div>
+            <div class="career-box"><span class="career-label">Tiros Totales</span><span class="career-val" id="career-total">0</span></div>
+            <div class="career-box"><span class="career-label">% Histórico</span><span class="career-val" id="career-pct">0%</span></div>
         </div>
 
         <div class="chart-controls">
+            <select id="profileChartMetric" onchange="updateProfileChart()">
+                <option value="global" selected>Global</option>
+                <option value="3p">Solo 3 Puntos</option>
+                <option value="2p">Solo 2 Puntos</option>
+                <option value="tl">Solo Tiros Libres</option>
+            </select>
             <select id="profileTimeRange" onchange="updateProfileChart()">
                 <option value="7">Últimos 7 días</option>
                 <option value="30" selected>Últimos 30 días</option>
@@ -110,6 +133,7 @@
                 <option value="365">Último año</option>
             </select>
         </div>
+
         <div class="chart-container" style="height: 150px; margin-bottom: 20px;">
             <canvas id="profile-chart"></canvas>
         </div>
@@ -117,12 +141,7 @@
         <details class="history-details">
             <summary>Ver Historial de Sesiones Completo</summary>
             <div class="filters-container">
-                <select id="filterZone" onchange="updateProfileTable()">
-                    <option value="all">Todas las zonas</option>
-                    <option value="3p">Solo 3 Puntos</option>
-                    <option value="2p">Solo 2 Puntos</option>
-                    <option value="tl">Solo Tiros Libres</option>
-                </select>
+                <select id="filterZone" onchange="updateProfileTable()"><option value="all">Todas las zonas</option><option value="3p">Solo 3 Puntos</option><option value="2p">Solo 2 Puntos</option><option value="tl">Solo Tiros Libres</option></select>
                 <input type="date" id="filterDate" onchange="updateProfileTable()">
             </div>
             <div class="table-container">
@@ -135,29 +154,19 @@
     </section>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('cancha')">
-            <span class="nav-icon">🏀</span><span class="nav-text">Cancha</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('club')">
-            <span class="nav-icon">🏆</span><span class="nav-text">Club</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('perfil')">
-            <span class="nav-icon">👤</span><span class="nav-text">Perfil</span>
-        </div>
+        <div class="nav-item active" onclick="switchTab('cancha')"><span class="nav-icon">🏀</span><span class="nav-text">Cancha</span></div>
+        <div class="nav-item" onclick="switchTab('club')"><span class="nav-icon">🏆</span><span class="nav-text">Club</span></div>
+        <div class="nav-item" onclick="switchTab('perfil')"><span class="nav-icon">👤</span><span class="nav-text">Perfil</span></div>
     </nav>
 
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="modal">
         <button class="modal-close-btn" onclick="closeModal()">×</button>
         <h2 id="zoneText"></h2>
-        <span class="modal-label">Fecha</span>
-        <input type="date" id="inputDate">
-        <span class="modal-label">Total Lanzados</span>
-        <input type="number" id="inputTotal" min="1">
-        <span class="modal-label">Total Encestados</span>
-        <input type="number" id="inputMade" min="0">
-        <span class="modal-label">Nota</span>
-        <textarea id="inputNote" maxlength="50"></textarea>
+        <span class="modal-label">Fecha</span><input type="date" id="inputDate">
+        <span class="modal-label">Total Lanzados</span><input type="number" id="inputTotal" min="1">
+        <span class="modal-label">Total Encestados</span><input type="number" id="inputMade" min="0">
+        <span class="modal-label">Nota</span><textarea id="inputNote" maxlength="50"></textarea>
         <p id="errorMsg" style="color:var(--danger); font-size:0.7rem; display:none; text-align:center; font-weight:bold; margin-bottom:10px;">⚠️ Verifica los datos ingresados</p>
         <button id="saveBtn" class="btn-save">Confirmar ✓</button>
     </div>

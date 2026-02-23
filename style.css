@@ -9,8 +9,7 @@
 
 body {
     font-family: 'Roboto Mono', monospace;
-    background-color: var(--bg);
-    color: var(--text);
+    background-color: var(--bg); color: var(--text);
     margin: 0; padding: 0; overflow: hidden; height: 100vh;
 }
 
@@ -43,10 +42,11 @@ body {
     .sidebar { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 
-.stat-card { background: var(--card); padding: 12px; border-radius: 12px; border-left: 4px solid #333; }
+.stat-card { background: var(--card); padding: 12px; border-radius: 12px; border-left: 4px solid #333; transition: 0.2s; }
 .highlight-card { border-left: 4px solid var(--primary); background: rgba(87, 234, 157, 0.05); }
 .stat-header { display: flex; justify-content: space-between; align-items: center; }
 .stat-header h4 { margin: 0; font-size: 0.65rem; color: #666; text-transform: uppercase; }
+.stat-date { font-size: 0.6rem; color: #666; height: 12px; text-align: right; }
 .stat-value { font-size: 1.2rem; font-weight: 900; color: var(--primary); }
 .chart-container { height: 50px; width: 100%; margin-top: 5px; }
 
@@ -72,21 +72,44 @@ input, textarea, select { width: 100%; background: #252525; border: 1px solid #4
 .club-members-count { font-size: 0.7rem; color: #666; }
 .btn-switch-club { background: none; border: 1px solid #444; color: #fff; border-radius: 8px; padding: 8px; cursor: pointer; }
 
-.admin-panel { background: rgba(244, 67, 54, 0.05); border: 1px solid rgba(244, 67, 54, 0.2); padding: 15px; border-radius: 12px; }
-.member-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #222; font-size: 0.8rem; }
-.member-role { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: #333; color: #aaa; }
-.member-role.admin { background: rgba(244, 67, 54, 0.2); color: var(--danger); }
+/* MIEMBROS & ADMIN */
+.members-details { background: var(--card); border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; }
+.members-summary { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline: none; list-style: none; }
+.members-summary::-webkit-details-marker { display: none; }
+.btn-invite { background: #222; border: 1px solid #444; color: #fff; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.7rem; font-weight: bold; }
 
+.admin-panel { padding: 0 15px 15px 15px; border-top: 1px solid #222; }
+.member-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.8rem; }
+.member-role { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; background: #333; color: #aaa; margin-left: 5px; }
+.member-role.admin { background: rgba(87, 234, 157, 0.2); color: var(--primary); }
+.admin-actions button { background: none; border: 1px solid #444; color: #888; border-radius: 4px; font-size: 0.6rem; padding: 3px 6px; cursor: pointer; margin-left: 5px; }
+.admin-actions button:hover { color: #fff; border-color: #666; }
+
+/* LEADERBOARD 2x2 GRID */
+.leaderboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.lb-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #222; }
+.lb-card h4 { margin: 0 0 10px 0; font-size: 0.75rem; color: #888; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+.lb-leader { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #333; }
+.lb-leader-name { font-size: 1rem; font-weight: bold; color: #fff; }
+.lb-leader-val { font-size: 1.4rem; font-weight: 900; color: var(--primary); }
+.lb-top5 { list-style: none; padding: 0; margin: 0; }
+.lb-top5 li { display: flex; justify-content: space-between; font-size: 0.7rem; color: #aaa; padding: 4px 0; }
+
+@media (max-width: 600px) { .leaderboard-grid { grid-template-columns: 1fr; } }
+
+/* FEED */
 .feed-item { padding: 10px 0; border-bottom: 1px dashed #222; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
 .feed-time { font-size: 0.6rem; color: #666; min-width: 40px; }
 .feed-highlight { color: var(--primary); font-weight: bold; }
+.feed-emoji { font-size: 1rem; }
 
-/* PERFIL (CAREER & FILTROS) */
+/* PERFIL */
 .career-stats-container { display: flex; gap: 15px; margin-bottom: 20px; }
 .career-box { flex: 1; background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #222; }
 .career-label { display: block; font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 5px; }
 .career-val { font-size: 1.8rem; font-weight: 900; color: #fff; }
 
+.chart-controls { display: flex; gap: 10px; margin-bottom: 10px; }
 .filters-container { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 10px; }
 .history-details { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #222; }
 .history-details summary { cursor: pointer; font-weight: bold; color: var(--primary); outline: none; }
