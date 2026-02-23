@@ -1,77 +1,67 @@
 let sessions = JSON.parse(localStorage.getItem('basketV_Final')) || [];
-let editingId = null, selectedCell = null, charts = {}, currentAverages = {};
+let editingId = null, selectedZone = null, charts = {}, currentAverages = {};
+
+// Definición de las nuevas zonas profesionales
+const ZONAS_PRO = [
+    { id: 'rim', label: 'Bajo Aro', path: 'M 60 0 L 90 0 L 90 15 Q 75 25 60 15 Z', color: '#ff8800' },
+    { id: 'paint-l', label: 'Pintura Izq', path: 'M 50 0 L 60 0 L 60 58 L 50 58 Z', color: '#ff8800' },
+    { id: 'paint-r', label: 'Pintura Der', path: 'M 90 0 L 100 0 L 100 58 L 90 58 Z', color: '#ff8800' },
+    { id: 'mid-l-base', label: 'Media Base Izq', path: 'M 15 0 L 50 0 L 50 35 Q 15 45 15 35 Z', color: '#ffbb00' },
+    { id: 'mid-r-base', label: 'Media Base Der', path: 'M 100 0 L 135 0 L 135 35 Q 135 45 100 35 Z', color: '#ffbb00' },
+    { id: 'mid-l-45', label: 'Media 45º Izq', path: 'M 15 35 Q 35 80 75 80 L 75 45 Q 50 45 50 35 Z', color: '#ffbb00' },
+    { id: 'mid-r-45', label: 'Media 45º Der', path: 'M 135 35 Q 115 80 75 80 L 75 45 Q 100 45 100 35 Z', color: '#ffbb00' },
+    { id: '3p-l-base', label: 'Triple Esquina Izq', path: 'M 0 0 L 15 0 L 15 35 Q 0 45 0 35 Z', color: '#ff4400' },
+    { id: '3p-r-base', label: 'Triple Esquina Der', path: 'M 135 0 L 150 0 L 150 35 Q 150 45 135 35 Z', color: '#ff4400' },
+    { id: '3p-l-45', label: 'Triple 45º Izq', path: 'M 0 35 Q 10 120 75 120 L 75 100 Q 15 100 15 35 Z', color: '#ff4400' },
+    { id: '3p-r-45', label: 'Triple 45º Der', path: 'M 150 35 Q 140 120 75 120 L 75 100 Q 135 100 135 35 Z', color: '#ff4400' },
+    { id: '3p-front', label: 'Triple Frontal', path: 'M 40 120 L 110 120 L 110 140 L 40 140 Z', color: '#ff4400' }
+];
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-
     document.getElementById(`tab-${tabId}`).classList.add('active');
-
-    // Activar icono nav
     const items = document.querySelectorAll('.nav-item');
-    if(tabId === 'cancha') items[0].classList.add('active');
+    if(tabId === 'cancha') { items[0].classList.add('active'); setTimeout(updateAll, 50); }
     if(tabId === 'club') items[1].classList.add('active');
     if(tabId === 'perfil') items[2].classList.add('active');
-
-    if(tabId === 'cancha') {
-        setTimeout(updateAll, 50);
-    }
 }
 
 function init() {
     const grid = document.getElementById('gridOverlay');
-    grid.innerHTML = '';
-    closeModal();
+    grid.innerHTML = ''; // Limpiamos la cuadrícula antigua
 
-    for (let i = 0; i < 110; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        cell.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openModal(i);
-        });
-        grid.appendChild(cell);
-    }
+    // En lugar de cuadrados, creamos un SVG dinámico para las zonas
+    let svgContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgContainer.setAttribute("viewBox", "0 0 150 140");
+    svgContainer.style.width = "100%";
+    svgContainer.style.height = "100%";
 
-    window.addEventListener('keydown', (e) => {
-        if (document.getElementById('modal').style.display === 'block') {
-            if (e.key === 'Escape') closeModal();
-            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                document.getElementById('saveBtn').click();
-            }
-        }
+    ZONAS_PRO.forEach(zona => {
+        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", zona.path);
+        path.setAttribute("id", zona.id);
+        path.setAttribute("class", "zona-path");
+        path.style.fill = "rgba(255,255,255,0.05)";
+        path.style.stroke = "rgba(255,255,255,0.1)";
+        path.style.cursor = "pointer";
+
+        path.onclick = () => openModal(zona.id);
+        svgContainer.appendChild(path);
     });
 
+    grid.appendChild(svgContainer);
+    closeModal();
     updateAll();
 }
 
-function detectRadialZone(cellId) {
-    const col = cellId % 11, row = Math.floor(cellId / 11);
-    const cellX = (col / 10) * 100, cellY = (row / 9) * 100;
-    const hoopX = 50, hoopY = 10;
-    let angleRad = Math.atan2(cellY - hoopY, cellX - hoopX);
-    let angleDeg = Math.round(Math.abs(angleRad * (180 / Math.PI) - 90) / 5) * 5;
-
-    const isTriple = (row >= 7 || col === 0 || col === 10 ||
-                     ((col === 1 || col === 9) && row >= 5) ||
-                     ((col === 2 || col === 8) && row >= 6));
-
-    let parent = isTriple ? "3 Puntos" : "2 Puntos";
-    let side = col < 5 ? "Izq." : (col > 5 ? "Der." : "");
-    let zoneName = isTriple ?
-        ((col === 0 || col === 10) && row <= 2 ? "Triple Lateral " + side : (col >= 5 && col <= 6 && row >= 7 ? "Triple Frontal" : `Triple ${angleDeg}º ${side}`))
-        : (col >= 4 && col <= 6 && row >= 3 && row <= 5 ? "Tiro Libre" : `2 Puntos ${angleDeg}º ${side}`);
-
-    return { parent, specific: zoneName.trim() };
-}
-
-function openModal(cellId, sid = null) {
-    selectedCell = cellId; editingId = sid;
+function openModal(zoneId, sid = null) {
+    selectedZone = zoneId;
+    editingId = sid;
     const s = sessions.find(x => x.id === sid);
-    const info = detectRadialZone(cellId);
+    const zonaInfo = ZONAS_PRO.find(z => z.id === zoneId) || { label: zoneId };
 
-    document.getElementById('zoneText').innerText = info.specific.toUpperCase();
+    document.getElementById('zoneText').innerText = zonaInfo.label.toUpperCase();
     document.getElementById('inputDate').value = s ? s.date : new Date().toISOString().split('T')[0];
     document.getElementById('inputTotal').value = s ? s.total : "";
     document.getElementById('inputMade').value = s ? s.made : "";
@@ -80,13 +70,11 @@ function openModal(cellId, sid = null) {
 
     document.getElementById('modal').style.display = 'block';
     document.getElementById('overlay').style.display = 'block';
-    setTimeout(() => document.getElementById('inputTotal').focus(), 100);
 }
 
 function closeModal() {
     document.getElementById('modal').style.display = 'none';
     document.getElementById('overlay').style.display = 'none';
-    editingId = null;
 }
 
 document.getElementById('saveBtn').onclick = () => {
@@ -98,14 +86,14 @@ document.getElementById('saveBtn').onclick = () => {
         return;
     }
 
-    const info = detectRadialZone(selectedCell);
+    const zonaInfo = ZONAS_PRO.find(z => z.id === selectedZone);
     const data = {
         id: editingId || Date.now(),
-        cellId: selectedCell,
+        cellId: selectedZone, // Usamos el ID de la zona ahora
         date: document.getElementById('inputDate').value,
         total, made,
-        zone: info.parent,
-        spec: info.specific,
+        zone: selectedZone.includes('3p') ? "3 Puntos" : "2 Puntos",
+        spec: zonaInfo ? zonaInfo.label : selectedZone,
         note: document.getElementById('inputNote').value
     };
 
@@ -135,122 +123,63 @@ function updateTable() {
             <td style="color:var(--primary); font-weight:bold">${s.spec}</td>
             <td>${s.made}/${s.total}</td>
             <td style="color:${color}; font-weight:bold">${p}%</td>
-            <td style="font-style:italic; font-size:0.75rem; color:#888">${s.note || '-'}</td>
+            <td>${s.note || '-'}</td>
             <td>
-                <button style="background:none; border:none; cursor:pointer;" onclick="switchTab('perfil'); openModal(${s.cellId}, ${s.id})">⚙️</button>
-                <button style="background:none; border:none; cursor:pointer;" onclick="deleteSession(${s.id})">🗑️</button>
+                <button style="background:none; border:none; cursor:pointer;" onclick="switchTab('perfil'); openModal('${s.cellId}', ${s.id})">⚙️</button>
             </td>
         </tr>`;
     });
 }
 
 function updateHeatmap() {
-    const cells = document.querySelectorAll('.grid-cell');
-    if (cells.length === 0) return;
-    cells.forEach(c => { c.style.background = ''; c.innerHTML = ''; });
+    ZONAS_PRO.forEach(zona => {
+        const el = document.getElementById(zona.id);
+        if (!el) return;
 
-    const realData = {};
-    sessions.forEach(s => realData[s.cellId] = Math.round((s.made/s.total)*100));
-
-    cells.forEach((cell, idx) => {
-        const cellX = idx % 11, cellY = Math.floor(idx / 11);
-        if (realData[idx] !== undefined) {
-            let p = realData[idx], r = p < 50 ? 255 : Math.round(510 - 5.1 * p), g = p < 50 ? Math.round(5.1 * p) : 255;
-            cell.style.backgroundColor = `rgba(${r}, ${g}, 0, 0.7)`;
-            cell.innerHTML = `<span class="cell-label">${p}%</span>`;
+        // Buscar última sesión de esta zona
+        const s = sessions.filter(x => x.cellId === zona.id).pop();
+        if (s) {
+            const p = Math.round((s.made / s.total) * 100);
+            let r = p < 50 ? 255 : Math.round(510 - 5.1 * p), g = p < 50 ? Math.round(5.1 * p) : 255;
+            el.style.fill = `rgba(${r}, ${g}, 0, 0.6)`;
         } else {
-            let num = 0, den = 0;
-            Object.keys(realData).forEach(rIdx => {
-                const dist = Math.sqrt(Math.pow(cellX - (rIdx%11), 2) + Math.pow(cellY - Math.floor(rIdx/11), 2));
-                if (dist <= 1.5) { const w = 1/Math.pow(dist,2); num += realData[rIdx]*w; den += w; }
-            });
-            if (den > 0) {
-                let p = num/den, r = p < 50 ? 255 : Math.round(510 - 5.1 * p), g = p < 50 ? Math.round(5.1 * p) : 255;
-                cell.style.backgroundColor = `rgba(${r}, ${g}, 0, 0.25)`;
-            }
+            el.style.fill = "rgba(255,255,255,0.05)";
         }
     });
 }
 
 function updateCharts() {
     const zones = { "Tiro Libre": "tl", "2 Puntos": "2p", "3 Puntos": "3p" };
-    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
     Object.entries(zones).forEach(([name, id]) => {
         const zH = sessions.filter(s => s.zone === name).sort((a,b) => new Date(a.date) - new Date(b.date));
-        const z30 = zH.filter(s => new Date(s.date) >= thirtyDaysAgo);
-
-        const totalMade = z30.reduce((a, b) => a + b.made, 0);
-        const totalShots = z30.reduce((a, b) => a + b.total, 0);
+        const totalMade = zH.slice(-20).reduce((a, b) => a + b.made, 0);
+        const totalShots = zH.slice(-20).reduce((a, b) => a + b.total, 0);
         const avg30d = totalShots > 0 ? Math.round((totalMade / totalShots) * 100) : 0;
 
         currentAverages[id] = avg30d;
-        const last15 = zH.slice(-15);
-        const vals = last15.map(d => Math.round((d.made / d.total) * 100));
-
-        const valEl = document.getElementById(`val-${id}`);
-        if (valEl) valEl.innerText = avg30d + "%";
+        document.getElementById(`val-${id}`).innerText = avg30d + "%";
 
         const canvas = document.getElementById(`chart-${id}`);
-        if (!canvas || canvas.offsetParent === null) return; // Si no es visible, no dibujes
+        if (!canvas || canvas.offsetParent === null) return;
 
         if (charts[id]) charts[id].destroy();
         charts[id] = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: last15.map(d => d.date),
-                datasets: [{ data: vals, borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }]
+                labels: zH.slice(-10).map(d => d.date),
+                datasets: [{ data: zH.slice(-10).map(d => Math.round((d.made/d.total)*100)), borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }]
             },
-            options: {
-                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                onHover: (event, el) => {
-                    const vEl = document.getElementById(`val-${id}`);
-                    const dEl = document.getElementById(`date-${id}`);
-                    if (el.length > 0) {
-                        vEl.innerText = vals[el[0].index] + "%";
-                        if (dEl) dEl.innerText = last15[el[0].index].date;
-                        vEl.style.color = "#fff";
-                    }
-                },
-                plugins: { legend: {display: false}, tooltip: {enabled: false} },
-                scales: { x: {display: false}, y: {display: false, min: 0, max: 105} }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, scales: { x: {display: false}, y: {display: false, min: 0, max: 105} } }
         });
     });
 }
 
-function resetStats(id) {
-    const vEl = document.getElementById(`val-${id}`);
-    const dEl = document.getElementById(`date-${id}`);
-    if (vEl) {
-        vEl.innerText = (currentAverages[id] || 0) + "%";
-        vEl.style.color = "var(--primary)";
-    }
-    if (dEl) dEl.innerText = "";
-}
-
 function exportData() {
-    const blob = new Blob([JSON.stringify(sessions)], {type: 'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup.json'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(sessions)], {type: 'application/json'})); a.download = 'backup.json'; a.click();
 }
 
 function importData(e) {
-    const r = new FileReader();
-    r.onload = (ev) => {
-        sessions = JSON.parse(ev.target.result);
-        localStorage.setItem('basketV_Final', JSON.stringify(sessions));
-        updateAll();
-    };
-    r.readAsText(e.target.files[0]);
+    const r = new FileReader(); r.onload = (ev) => { sessions = JSON.parse(ev.target.result); localStorage.setItem('basketV_Final', JSON.stringify(sessions)); updateAll(); }; r.readAsText(e.target.files[0]);
 }
 
-function deleteSession(id) {
-    if(confirm('¿Borrar?')) {
-        sessions = sessions.filter(s => s.id !== id);
-        localStorage.setItem('basketV_Final', JSON.stringify(sessions));
-        updateAll();
-    }
-}
-
-// Arrancar
 window.onload = init;
