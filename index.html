@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Score Pro v1.18.0</title>
-
+    <title>Basket Score Pro v1.19.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700;900&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -28,36 +26,62 @@
             <div class="court-wrapper" id="courtContainer"></div>
 
             <div class="sidebar">
+                <div class="stat-card highlight-card">
+                    <div class="stat-header"><h4>Global (30d)</h4><div class="stat-value" id="val-global">--</div></div>
+                </div>
                 <div class="stat-card" onmouseleave="resetStats('tl')">
                     <div class="stat-header"><h4>Tiros Libres</h4><div class="stat-value" id="val-tl">--</div></div>
-                    <div class="stat-date" id="date-tl"></div>
                     <div class="chart-container"><canvas id="chart-tl"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('2p')">
                     <div class="stat-header"><h4>2 Puntos</h4><div class="stat-value" id="val-2p">--</div></div>
-                    <div class="stat-date" id="date-2p"></div>
                     <div class="chart-container"><canvas id="chart-2p"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('3p')">
                     <div class="stat-header"><h4>3 Puntos</h4><div class="stat-value" id="val-3p">--</div></div>
-                    <div class="stat-date" id="date-3p"></div>
                     <div class="chart-container"><canvas id="chart-3p"></canvas></div>
                 </div>
             </div>
         </div>
+
+        <div class="quick-log-container">
+            <h3 class="section-title">Últimas 10 Sesiones</h3>
+            <table>
+                <thead><tr><th>Fecha</th><th>Zona</th><th>Ratio</th><th>%</th><th>⚙️</th></tr></thead>
+                <tbody id="quickLogBody"></tbody>
+            </table>
+        </div>
     </section>
 
     <section id="tab-club" class="tab-content">
-        <div class="header-simple">
-            <h2>🏆 Leaderboard <span class="subtitle">30 Días</span></h2>
+        <div class="club-header">
+            <div class="club-info">
+                <div class="club-logo">🏀</div>
+                <div>
+                    <h2 class="club-name">Goga Basket Club</h2>
+                    <span class="club-members-count">12 Miembros</span>
+                </div>
+            </div>
+            <button class="btn-switch-club">⇄</button>
         </div>
-        <div class="leaderboard-container">
+
+        <div class="admin-panel">
+            <h3 class="section-title">Panel de Admin</h3>
+            <button class="btn-tool" style="width:100%; padding:10px; margin-bottom:10px;">🔗 Generar Link de Invitación</button>
+            <div class="member-list" id="mockMembersList"></div>
+        </div>
+
+        <div class="leaderboard-container" style="margin-top: 20px;">
+            <h3 class="section-title">🏆 Leaderboard (30 Días)</h3>
             <table class="leader-table">
                 <thead><tr><th>Pos</th><th>Jugador</th><th>3P %</th><th>2P %</th><th>TL %</th></tr></thead>
-                <tbody id="leaderboardBody">
-                    <tr><td>1</td><td>Goga Admin</td><td>--</td><td>--</td><td>--</td></tr>
-                </tbody>
+                <tbody id="leaderboardBody"></tbody>
             </table>
+        </div>
+
+        <div class="feed-container" style="margin-top: 20px;">
+            <h3 class="section-title">⚡ Actividad Reciente</h3>
+            <div id="activityFeed"></div>
         </div>
     </section>
 
@@ -65,12 +89,49 @@
         <div class="header-simple">
             <h2>👤 Mi Perfil</h2>
         </div>
-        <div class="table-container">
-            <table>
-                <thead><tr><th>FECHA</th><th>ZONA</th><th>RATIO</th><th>%</th><th>NOTA</th></tr></thead>
-                <tbody id="logBody"></tbody>
-            </table>
+
+        <div class="career-stats-container">
+            <div class="career-box">
+                <span class="career-label">Tiros Totales</span>
+                <span class="career-val" id="career-total">0</span>
+            </div>
+            <div class="career-box">
+                <span class="career-label">% Histórico</span>
+                <span class="career-val" id="career-pct">0%</span>
+            </div>
         </div>
+
+        <div class="chart-controls">
+            <select id="profileTimeRange" onchange="updateProfileChart()">
+                <option value="7">Últimos 7 días</option>
+                <option value="30" selected>Últimos 30 días</option>
+                <option value="90">Últimos 3 meses</option>
+                <option value="180">Últimos 6 meses</option>
+                <option value="365">Último año</option>
+            </select>
+        </div>
+        <div class="chart-container" style="height: 150px; margin-bottom: 20px;">
+            <canvas id="profile-chart"></canvas>
+        </div>
+
+        <details class="history-details">
+            <summary>Ver Historial de Sesiones Completo</summary>
+            <div class="filters-container">
+                <select id="filterZone" onchange="updateProfileTable()">
+                    <option value="all">Todas las zonas</option>
+                    <option value="3p">Solo 3 Puntos</option>
+                    <option value="2p">Solo 2 Puntos</option>
+                    <option value="tl">Solo Tiros Libres</option>
+                </select>
+                <input type="date" id="filterDate" onchange="updateProfileTable()">
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>FECHA</th><th>ZONA</th><th>RATIO</th><th>%</th><th>NOTA</th></tr></thead>
+                    <tbody id="logBody"></tbody>
+                </table>
+            </div>
+        </details>
     </section>
 
     <nav class="bottom-nav">
