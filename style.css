@@ -1,10 +1,17 @@
 :root {
-    --primary: #ff8800; --bg: #0a0a0a; --card: #161616;
-    --text: #ffffff; --danger: #f44336; --nav-bg: #121212;
+    --primary: #57ea9d; /* Nuevo verde neón */
+    --bg: #0a0a0a;
+    --card: #161616;
+    --text: #ffffff;
+    --danger: #f44336;
+    --nav-bg: #121212;
 }
 
 body {
-    font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text);
+    /* Nueva Tipografía global */
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--bg);
+    color: var(--text);
     margin: 0; padding: 0; overflow: hidden; height: 100vh;
 }
 
@@ -14,7 +21,7 @@ body {
 .header-tools, .header-simple { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .header-simple h2 { margin: 0; font-size: 1.4rem; font-weight: 900; }
 .subtitle { font-size: 0.8rem; color: #666; margin-left: 10px; }
-.btn-tool { background: #222; color: #888; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+.btn-tool { background: #222; color: #888; border: 1px solid #333; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold; font-family: inherit; }
 
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--nav-bg); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; z-index: 900; }
 .nav-item { color: #555; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; }
@@ -25,7 +32,8 @@ body {
 /* CANCHA PRO */
 .main-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; width: 100%; max-width: 1200px; margin: 0 auto; }
 .court-wrapper {
-    position: relative; width: 100%; aspect-ratio: 150 / 140;
+    position: relative; width: 100%;
+    aspect-ratio: 500 / 350; /* CORRECCIÓN: Medida exacta de tu diseño SVG */
     background: #111; border-radius: 12px; border: 1px solid #333;
     display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
@@ -48,6 +56,7 @@ body {
     fill: white;
     font-size: 6px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    font-family: 'Roboto Mono', monospace; /* Aplicar fuente a los % */
 }
 
 .sidebar { display: flex; flex-direction: column; gap: 15px; }
@@ -67,7 +76,7 @@ body {
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 1000; }
 .modal-close-btn { position: absolute; top: 10px; right: 15px; color: #555; font-size: 1.2rem; cursor: pointer; border: none; background: none; }
 input, textarea { width: 100%; background: #252525; border: 1px solid #444; color: white; padding: 8px 10px; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; font-size: 16px !important; font-family: inherit; }
-.btn-save { background: var(--primary); color: #000; border: none; padding: 12px; width: 100%; font-weight: 900; border-radius: 10px; cursor: pointer; text-transform: uppercase; }
+.btn-save { background: var(--primary); color: #000; border: none; padding: 12px; width: 100%; font-weight: 900; border-radius: 10px; cursor: pointer; text-transform: uppercase; font-family: inherit; }
 
 .table-container, .leaderboard-container { background: var(--card); border-radius: 12px; padding: 10px; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 500px; }
