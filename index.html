@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Basket Score Pro v1.15.1</title>
+    <title>Basket Score Pro v1.16.2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -20,31 +20,22 @@
         </div>
 
         <div class="main-layout">
-            <div class="court-wrapper">
-                <svg class="court-svg" viewBox="0 0 150 140" preserveAspectRatio="xMidYMid meet">
-                    <rect x="50" y="0" width="50" height="58" />
-                    <line x1="60" y1="10" x2="90" y2="10" />
-                    <circle cx="75" cy="15" r="3" />
-                    <path d="M 50 58 A 25 25 0 1 0 100 58" />
-                    <path d="M 15 0 L 15 35 Q 15 100 75 100 Q 135 100 135 35 L 135 0" />
-                </svg>
-                <div class="grid-overlay" id="gridOverlay"></div>
-            </div>
+            <div class="court-wrapper" id="courtContainer"></div>
 
             <div class="sidebar">
                 <div class="stat-card" onmouseleave="resetStats('tl')">
                     <div class="stat-header"><h4>Tiros Libres</h4><div class="stat-value" id="val-tl">--</div></div>
-                    <div class="stat-date" id="date-tl" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                    <div class="stat-date" id="date-tl"></div>
                     <div class="chart-container"><canvas id="chart-tl"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('2p')">
                     <div class="stat-header"><h4>2 Puntos</h4><div class="stat-value" id="val-2p">--</div></div>
-                    <div class="stat-date" id="date-2p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                    <div class="stat-date" id="date-2p"></div>
                     <div class="chart-container"><canvas id="chart-2p"></canvas></div>
                 </div>
                 <div class="stat-card" onmouseleave="resetStats('3p')">
                     <div class="stat-header"><h4>3 Puntos</h4><div class="stat-value" id="val-3p">--</div></div>
-                    <div class="stat-date" id="date-3p" style="font-size: 0.6rem; color: #444; height: 12px; text-align: right;"></div>
+                    <div class="stat-date" id="date-3p"></div>
                     <div class="chart-container"><canvas id="chart-3p"></canvas></div>
                 </div>
             </div>
@@ -57,9 +48,7 @@
         </div>
         <div class="leaderboard-container">
             <table class="leader-table">
-                <thead>
-                    <tr><th>Pos</th><th>Jugador</th><th>3P %</th><th>2P %</th><th>TL %</th></tr>
-                </thead>
+                <thead><tr><th>Pos</th><th>Jugador</th><th>3P %</th><th>2P %</th><th>TL %</th></tr></thead>
                 <tbody id="leaderboardBody">
                     <tr><td>1</td><td>Goga Admin</td><td>--</td><td>--</td><td>--</td></tr>
                 </tbody>
@@ -72,8 +61,8 @@
             <h2>👤 Mi Perfil</h2>
         </div>
         <div class="table-container">
-            <table class="log-table">
-                <thead><tr><th>FECHA</th><th>ZONA</th><th>RATIO</th><th>%</th><th>NOTA</th><th>ACCIONES</th></tr></thead>
+            <table>
+                <thead><tr><th>FECHA</th><th>ZONA</th><th>RATIO</th><th>%</th><th>NOTA</th></tr></thead>
                 <tbody id="logBody"></tbody>
             </table>
         </div>
@@ -103,7 +92,7 @@
         <input type="number" id="inputMade" min="0">
         <span class="modal-label">Nota</span>
         <textarea id="inputNote" maxlength="50"></textarea>
-        <p id="errorMsg">⚠️ Los encestados no pueden superar el total</p>
+        <p id="errorMsg" style="color:var(--danger); font-size:0.7rem; display:none; text-align:center; font-weight:bold; margin-bottom:10px;">⚠️ Verifica los datos ingresados</p>
         <button id="saveBtn" class="btn-save">Confirmar ✓</button>
     </div>
 

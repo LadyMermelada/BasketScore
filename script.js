@@ -1,26 +1,33 @@
 let sessions = JSON.parse(localStorage.getItem('basketV_Final')) || [];
 let editingId = null, selectedZone = null, charts = {}, currentAverages = {};
 
-// Definición de las nuevas zonas profesionales
+// Geometría perfecta: Sin superposiciones rotas.
+// El orden importa (se dibuja desde afuera hacia el aro)
 const ZONAS_PRO = [
-    { id: 'rim', label: 'Bajo Aro', path: 'M 60 0 L 90 0 L 90 15 Q 75 25 60 15 Z', color: '#ff8800' },
-    { id: 'paint-l', label: 'Pintura Izq', path: 'M 50 0 L 60 0 L 60 58 L 50 58 Z', color: '#ff8800' },
-    { id: 'paint-r', label: 'Pintura Der', path: 'M 90 0 L 100 0 L 100 58 L 90 58 Z', color: '#ff8800' },
-    { id: 'mid-l-base', label: 'Media Base Izq', path: 'M 15 0 L 50 0 L 50 35 Q 15 45 15 35 Z', color: '#ffbb00' },
-    { id: 'mid-r-base', label: 'Media Base Der', path: 'M 100 0 L 135 0 L 135 35 Q 135 45 100 35 Z', color: '#ffbb00' },
-    { id: 'mid-l-45', label: 'Media 45º Izq', path: 'M 15 35 Q 35 80 75 80 L 75 45 Q 50 45 50 35 Z', color: '#ffbb00' },
-    { id: 'mid-r-45', label: 'Media 45º Der', path: 'M 135 35 Q 115 80 75 80 L 75 45 Q 100 45 100 35 Z', color: '#ffbb00' },
-    { id: '3p-l-base', label: 'Triple Esquina Izq', path: 'M 0 0 L 15 0 L 15 35 Q 0 45 0 35 Z', color: '#ff4400' },
-    { id: '3p-r-base', label: 'Triple Esquina Der', path: 'M 135 0 L 150 0 L 150 35 Q 150 45 135 35 Z', color: '#ff4400' },
-    { id: '3p-l-45', label: 'Triple 45º Izq', path: 'M 0 35 Q 10 120 75 120 L 75 100 Q 15 100 15 35 Z', color: '#ff4400' },
-    { id: '3p-r-45', label: 'Triple 45º Der', path: 'M 150 35 Q 140 120 75 120 L 75 100 Q 135 100 135 35 Z', color: '#ff4400' },
-    { id: '3p-front', label: 'Triple Frontal', path: 'M 40 120 L 110 120 L 110 140 L 40 140 Z', color: '#ff4400' }
+    // Triples
+    { id: '3p-l-corner', label: 'Triple Esq Izq', path: 'M 0 0 L 15 0 L 15 35 L 0 35 Z', cx: 7.5, cy: 17.5, type: '3p' },
+    { id: '3p-r-corner', label: 'Triple Esq Der', path: 'M 135 0 L 150 0 L 150 35 L 135 35 Z', cx: 142.5, cy: 17.5, type: '3p' },
+    { id: '3p-l-wing', label: 'Triple Ala Izq', path: 'M 0 35 L 15 35 Q 15 100 75 100 L 75 140 L 0 140 Z', cx: 25, cy: 100, type: '3p' },
+    { id: '3p-r-wing', label: 'Triple Ala Der', path: 'M 150 35 L 135 35 Q 135 100 75 100 L 75 140 L 150 140 Z', cx: 125, cy: 100, type: '3p' },
+
+    // Media Distancia
+    { id: 'mid-l-corner', label: 'Media Esq Izq', path: 'M 15 0 L 50 0 L 50 35 L 15 35 Z', cx: 32.5, cy: 17.5, type: '2p' },
+    { id: 'mid-r-corner', label: 'Media Esq Der', path: 'M 100 0 L 135 0 L 135 35 L 100 35 Z', cx: 117.5, cy: 17.5, type: '2p' },
+    { id: 'mid-l-wing', label: 'Media Ala Izq', path: 'M 15 35 L 50 35 L 50 58 L 75 58 L 75 100 Q 15 100 15 35 Z', cx: 40, cy: 65, type: '2p' },
+    { id: 'mid-r-wing', label: 'Media Ala Der', path: 'M 135 35 L 100 35 L 100 58 L 75 58 L 75 100 Q 135 100 135 35 Z', cx: 110, cy: 65, type: '2p' },
+
+    // Pintura, Tiro Libre y Aro
+    { id: 'paint', label: 'Pintura', path: 'M 50 0 L 100 0 L 100 58 L 50 58 Z', cx: 75, cy: 35, type: '2p' },
+    { id: 'ft', label: 'Tiro Libre', path: 'M 50 58 A 25 25 0 0 0 100 58 Z', cx: 75, cy: 70, type: 'tl' },
+    { id: 'rim', label: 'Bajo Aro', path: 'M 60 0 L 90 0 L 90 15 Q 75 25 60 15 Z', cx: 75, cy: 10, type: '2p' }
 ];
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
     document.getElementById(`tab-${tabId}`).classList.add('active');
+
     const items = document.querySelectorAll('.nav-item');
     if(tabId === 'cancha') { items[0].classList.add('active'); setTimeout(updateAll, 50); }
     if(tabId === 'club') items[1].classList.add('active');
@@ -28,40 +35,48 @@ function switchTab(tabId) {
 }
 
 function init() {
-    const grid = document.getElementById('gridOverlay');
-    grid.innerHTML = ''; // Limpiamos la cuadrícula antigua
+    const container = document.getElementById('courtContainer');
+    container.innerHTML = '';
 
-    // En lugar de cuadrados, creamos un SVG dinámico para las zonas
-    let svgContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgContainer.setAttribute("viewBox", "0 0 150 140");
-    svgContainer.style.width = "100%";
-    svgContainer.style.height = "100%";
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 150 140");
+    svg.style.width = "100%";
+    svg.style.height = "100%";
 
     ZONAS_PRO.forEach(zona => {
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
         let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", zona.path);
         path.setAttribute("id", zona.id);
         path.setAttribute("class", "zona-path");
-        path.style.fill = "rgba(255,255,255,0.05)";
-        path.style.stroke = "rgba(255,255,255,0.1)";
-        path.style.cursor = "pointer";
-
+        path.style.fill = "rgba(255,255,255,0.02)";
         path.onclick = () => openModal(zona.id);
-        svgContainer.appendChild(path);
+
+        let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", zona.cx);
+        text.setAttribute("y", zona.cy);
+        text.setAttribute("class", "zona-label-text");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("id", "label-" + zona.id);
+        text.textContent = "";
+
+        g.appendChild(path);
+        g.appendChild(text);
+        svg.appendChild(g);
     });
 
-    grid.appendChild(svgContainer);
+    container.appendChild(svg);
     closeModal();
     updateAll();
 }
 
 function openModal(zoneId, sid = null) {
-    selectedZone = zoneId;
-    editingId = sid;
+    selectedZone = zoneId; editingId = sid;
     const s = sessions.find(x => x.id === sid);
-    const zonaInfo = ZONAS_PRO.find(z => z.id === zoneId) || { label: zoneId };
+    const zonaInfo = ZONAS_PRO.find(z => z.id === zoneId);
 
-    document.getElementById('zoneText').innerText = zonaInfo.label.toUpperCase();
+    document.getElementById('zoneText').innerText = zonaInfo ? zonaInfo.label.toUpperCase() : zoneId;
     document.getElementById('inputDate').value = s ? s.date : new Date().toISOString().split('T')[0];
     document.getElementById('inputTotal').value = s ? s.total : "";
     document.getElementById('inputMade').value = s ? s.made : "";
@@ -75,6 +90,7 @@ function openModal(zoneId, sid = null) {
 function closeModal() {
     document.getElementById('modal').style.display = 'none';
     document.getElementById('overlay').style.display = 'none';
+    editingId = null;
 }
 
 document.getElementById('saveBtn').onclick = () => {
@@ -87,12 +103,18 @@ document.getElementById('saveBtn').onclick = () => {
     }
 
     const zonaInfo = ZONAS_PRO.find(z => z.id === selectedZone);
+    let parentZone = "2 Puntos";
+    if (zonaInfo) {
+        if (zonaInfo.type === '3p') parentZone = "3 Puntos";
+        if (zonaInfo.type === 'tl') parentZone = "Tiro Libre";
+    }
+
     const data = {
         id: editingId || Date.now(),
-        cellId: selectedZone, // Usamos el ID de la zona ahora
+        cellId: selectedZone,
         date: document.getElementById('inputDate').value,
         total, made,
-        zone: selectedZone.includes('3p') ? "3 Puntos" : "2 Puntos",
+        zone: parentZone,
         spec: zonaInfo ? zonaInfo.label : selectedZone,
         note: document.getElementById('inputNote').value
     };
@@ -106,9 +128,7 @@ document.getElementById('saveBtn').onclick = () => {
 };
 
 function updateAll() {
-    updateTable();
-    updateHeatmap();
-    updateCharts();
+    updateTable(); updateHeatmap(); updateCharts();
 }
 
 function updateTable() {
@@ -124,9 +144,6 @@ function updateTable() {
             <td>${s.made}/${s.total}</td>
             <td style="color:${color}; font-weight:bold">${p}%</td>
             <td>${s.note || '-'}</td>
-            <td>
-                <button style="background:none; border:none; cursor:pointer;" onclick="switchTab('perfil'); openModal('${s.cellId}', ${s.id})">⚙️</button>
-            </td>
         </tr>`;
     });
 }
@@ -134,52 +151,83 @@ function updateTable() {
 function updateHeatmap() {
     ZONAS_PRO.forEach(zona => {
         const el = document.getElementById(zona.id);
+        const label = document.getElementById("label-" + zona.id);
         if (!el) return;
 
-        // Buscar última sesión de esta zona
-        const s = sessions.filter(x => x.cellId === zona.id).pop();
-        if (s) {
-            const p = Math.round((s.made / s.total) * 100);
-            let r = p < 50 ? 255 : Math.round(510 - 5.1 * p), g = p < 50 ? Math.round(5.1 * p) : 255;
+        const zSessions = sessions.filter(x => x.cellId === zona.id);
+        if (zSessions.length > 0) {
+            // Mostrar promedio de la zona (histórico) o se puede ajustar al último
+            const tM = zSessions.reduce((a,b) => a + b.made, 0);
+            const tS = zSessions.reduce((a,b) => a + b.total, 0);
+            const p = Math.round((tM / tS) * 100);
+
+            let r = p < 50 ? 255 : Math.round(510 - 5.1 * p);
+            let g = p < 50 ? Math.round(5.1 * p) : 255;
+
             el.style.fill = `rgba(${r}, ${g}, 0, 0.6)`;
+            if (label) label.textContent = p + "%";
         } else {
-            el.style.fill = "rgba(255,255,255,0.05)";
+            el.style.fill = "rgba(255,255,255,0.02)";
+            if (label) label.textContent = "";
         }
     });
 }
 
 function updateCharts() {
     const zones = { "Tiro Libre": "tl", "2 Puntos": "2p", "3 Puntos": "3p" };
+    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     Object.entries(zones).forEach(([name, id]) => {
         const zH = sessions.filter(s => s.zone === name).sort((a,b) => new Date(a.date) - new Date(b.date));
-        const totalMade = zH.slice(-20).reduce((a, b) => a + b.made, 0);
-        const totalShots = zH.slice(-20).reduce((a, b) => a + b.total, 0);
-        const avg30d = totalShots > 0 ? Math.round((totalMade / totalShots) * 100) : 0;
+        const z30 = zH.filter(s => new Date(s.date) >= thirtyDaysAgo);
 
-        currentAverages[id] = avg30d;
-        document.getElementById(`val-${id}`).innerText = avg30d + "%";
+        const totalMade = z30.reduce((a, b) => a + b.made, 0);
+        const totalShots = z30.reduce((a, b) => a + b.total, 0);
+        const avg = totalShots > 0 ? Math.round((totalMade / totalShots) * 100) : 0;
+
+        currentAverages[id] = avg;
+        const valEl = document.getElementById(`val-${id}`);
+        if(valEl) valEl.innerText = avg + "%";
 
         const canvas = document.getElementById(`chart-${id}`);
         if (!canvas || canvas.offsetParent === null) return;
+
+        const last15 = zH.slice(-15);
+        const vals = last15.map(d => Math.round((d.made/d.total)*100));
 
         if (charts[id]) charts[id].destroy();
         charts[id] = new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: {
-                labels: zH.slice(-10).map(d => d.date),
-                datasets: [{ data: zH.slice(-10).map(d => Math.round((d.made/d.total)*100)), borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }]
+                labels: last15.map(d => d.date),
+                datasets: [{ data: vals, borderColor: '#ff8800', borderWidth: 2, tension: 0.3, pointRadius: 2, fill: true, backgroundColor: 'rgba(255, 136, 0, 0.05)' }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false} }, scales: { x: {display: false}, y: {display: false, min: 0, max: 105} } }
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                onHover: (event, el) => {
+                    const vEl = document.getElementById(`val-${id}`);
+                    const dEl = document.getElementById(`date-${id}`);
+                    if (el.length > 0) {
+                        vEl.innerText = vals[el[0].index] + "%";
+                        if (dEl) dEl.innerText = last15[el[0].index].date;
+                        vEl.style.color = "#fff";
+                    }
+                },
+                plugins: { legend: {display: false}, tooltip: {enabled: false} },
+                scales: { x: {display: false}, y: {display: false, min: 0, max: 105} }
+            }
         });
     });
 }
 
-function exportData() {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(sessions)], {type: 'application/json'})); a.download = 'backup.json'; a.click();
+function resetStats(id) {
+    const vEl = document.getElementById(`val-${id}`);
+    const dEl = document.getElementById(`date-${id}`);
+    if (vEl) { vEl.innerText = (currentAverages[id] || 0) + "%"; vEl.style.color = "var(--primary)"; }
+    if (dEl) dEl.innerText = "";
 }
 
-function importData(e) {
-    const r = new FileReader(); r.onload = (ev) => { sessions = JSON.parse(ev.target.result); localStorage.setItem('basketV_Final', JSON.stringify(sessions)); updateAll(); }; r.readAsText(e.target.files[0]);
-}
+function exportData() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(sessions)], {type: 'application/json'})); a.download = 'backup.json'; a.click(); }
+function importData(e) { const r = new FileReader(); r.onload = (ev) => { sessions = JSON.parse(ev.target.result); localStorage.setItem('basketV_Final', JSON.stringify(sessions)); updateAll(); }; r.readAsText(e.target.files[0]); }
 
 window.onload = init;
