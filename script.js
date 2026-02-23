@@ -1,24 +1,32 @@
 let sessions = JSON.parse(localStorage.getItem('basketV_Final')) || [];
 let editingId = null, selectedZone = null, charts = {}, currentAverages = {};
 
-// Geometría perfecta: Sin superposiciones rotas.
-// El orden importa (se dibuja desde afuera hacia el aro)
+// GEOMETRÍA CORREGIDA v1.16.3
+// - Pintura dividida en 2 (Alta/Baja)
+// - Tiro libre más chato y sin superposición con alas
+// - Alas medias ajustadas a los nuevos bordes
 const ZONAS_PRO = [
-    // Triples
+    // --- ZONAS EXTERIORES (3 Puntos) ---
+    // Se dibujan primero para quedar al fondo
     { id: '3p-l-corner', label: 'Triple Esq Izq', path: 'M 0 0 L 15 0 L 15 35 L 0 35 Z', cx: 7.5, cy: 17.5, type: '3p' },
     { id: '3p-r-corner', label: 'Triple Esq Der', path: 'M 135 0 L 150 0 L 150 35 L 135 35 Z', cx: 142.5, cy: 17.5, type: '3p' },
     { id: '3p-l-wing', label: 'Triple Ala Izq', path: 'M 0 35 L 15 35 Q 15 100 75 100 L 75 140 L 0 140 Z', cx: 25, cy: 100, type: '3p' },
     { id: '3p-r-wing', label: 'Triple Ala Der', path: 'M 150 35 L 135 35 Q 135 100 75 100 L 75 140 L 150 140 Z', cx: 125, cy: 100, type: '3p' },
 
-    // Media Distancia
+    // --- ZONAS MEDIA DISTANCIA ---
     { id: 'mid-l-corner', label: 'Media Esq Izq', path: 'M 15 0 L 50 0 L 50 35 L 15 35 Z', cx: 32.5, cy: 17.5, type: '2p' },
     { id: 'mid-r-corner', label: 'Media Esq Der', path: 'M 100 0 L 135 0 L 135 35 L 100 35 Z', cx: 117.5, cy: 17.5, type: '2p' },
-    { id: 'mid-l-wing', label: 'Media Ala Izq', path: 'M 15 35 L 50 35 L 50 58 L 75 58 L 75 100 Q 15 100 15 35 Z', cx: 40, cy: 65, type: '2p' },
-    { id: 'mid-r-wing', label: 'Media Ala Der', path: 'M 135 35 L 100 35 L 100 58 L 75 58 L 75 100 Q 135 100 135 35 Z', cx: 110, cy: 65, type: '2p' },
+    // Alas ajustadas para no invadir la pintura ni el tiro libre
+    { id: 'mid-l-wing', label: 'Media Ala Izq', path: 'M 15 35 L 50 35 L 50 88 Q 32 88 15 82 Z', cx: 35, cy: 60, type: '2p' },
+    { id: 'mid-r-wing', label: 'Media Ala Der', path: 'M 135 35 L 100 35 L 100 88 Q 118 88 135 82 Z', cx: 115, cy: 60, type: '2p' },
 
-    // Pintura, Tiro Libre y Aro
-    { id: 'paint', label: 'Pintura', path: 'M 50 0 L 100 0 L 100 58 L 50 58 Z', cx: 75, cy: 35, type: '2p' },
-    { id: 'ft', label: 'Tiro Libre', path: 'M 50 58 A 25 25 0 0 0 100 58 Z', cx: 75, cy: 70, type: 'tl' },
+    // --- ZONAS INTERIORES (Pintura y TL) ---
+    // Pintura dividida horizontalmente
+    { id: 'paint-top', label: 'Pintura Alta', path: 'M 50 0 L 100 0 L 100 29 L 50 29 Z', cx: 75, cy: 22, type: '2p' },
+    { id: 'paint-bottom', label: 'Pintura Baja', path: 'M 50 29 L 100 29 L 100 58 L 50 58 Z', cx: 75, cy: 43.5, type: '2p' },
+    // Tiro libre más chato (Q 75 80 en vez de curvas más profundas)
+    { id: 'ft', label: 'Tiro Libre', path: 'M 50 58 Q 75 80 100 58 Z', cx: 75, cy: 67, type: 'tl' },
+    // Aro encima de todo
     { id: 'rim', label: 'Bajo Aro', path: 'M 60 0 L 90 0 L 90 15 Q 75 25 60 15 Z', cx: 75, cy: 10, type: '2p' }
 ];
 
@@ -156,7 +164,6 @@ function updateHeatmap() {
 
         const zSessions = sessions.filter(x => x.cellId === zona.id);
         if (zSessions.length > 0) {
-            // Mostrar promedio de la zona (histórico) o se puede ajustar al último
             const tM = zSessions.reduce((a,b) => a + b.made, 0);
             const tS = zSessions.reduce((a,b) => a + b.total, 0);
             const p = Math.round((tM / tS) * 100);
