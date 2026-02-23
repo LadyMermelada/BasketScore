@@ -175,7 +175,6 @@ function updateTable() {
     body.innerHTML = '';
     [...sessions].sort((a,b) => b.id - a.id).forEach(s => {
         const p = Math.round((s.made / s.total) * 100);
-        // En la tabla ahora mostramos el color monocromático si superan el 50%
         let color = p >= 50 ? '#57ea9d' : '#888';
         body.innerHTML += `<tr>
             <td>${s.date}</td>
@@ -199,8 +198,8 @@ function updateHeatmap() {
             const tS = zSessions.reduce((a,b) => a + b.total, 0);
             const p = Math.round((tM / tS) * 100);
 
-            // ESCALA MONOCROMÁTICA: Modificamos el Alpha (Transparencia) de #57ea9d (RGB: 87, 234, 157)
-            // Si tiene 0%, alfa es 0.1 (suave). Si tiene 100%, alfa es 0.9 (intenso).
+            // ESCALA MONOCROMÁTICA ESTRICTA (Sin rojos ni naranjas)
+            // Calculamos solo la transparencia (Alpha). 0% = 0.1, 100% = 0.9
             let alpha = 0.1 + (p / 100) * 0.8;
             let fillColor = `rgba(87, 234, 157, ${alpha})`;
 
@@ -253,12 +252,12 @@ function updateCharts() {
                 labels: last15.map(d => d.date),
                 datasets: [{
                     data: vals,
-                    borderColor: '#57ea9d', /* Línea en verde neón */
+                    borderColor: '#57ea9d',
                     borderWidth: 2,
                     tension: 0.3,
                     pointRadius: 2,
                     fill: true,
-                    backgroundColor: 'rgba(87, 234, 157, 0.1)' /* Fondo semitransparente verde neón */
+                    backgroundColor: 'rgba(87, 234, 157, 0.1)'
                 }]
             },
             options: {
